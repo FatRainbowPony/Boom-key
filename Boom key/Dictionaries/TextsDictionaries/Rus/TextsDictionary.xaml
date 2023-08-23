@@ -6,10 +6,6 @@
         Окно загрузки данных приложения
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingUpdateWindowTitle">
-        Окно загрузки обновления
-    </system:String>
-
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MainWindowTitle">
         Главная страница
     </system:String>
