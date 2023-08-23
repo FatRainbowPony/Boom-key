@@ -9,15 +9,15 @@ using appDevToolsExts = AppDevTools.Extensions;
 
 namespace BoomKey.Models
 {
-    public abstract class Shortcut : ViewModel
+    public class Shortcut : ViewModel
     {
         #region Fields
 
         #region Private
-        private readonly string uriStrToQuestionIcon;
+        private readonly string uriStrToQuestionIcon = $"pack://application:,,,/{App.Name};component/Assets/Icons/QuestionIcon.ico";
         private string? name;
         private HotKey hotKey;
-        private ImageSource? icon;
+        private ImageSource icon;
         #endregion Private
 
         #endregion Fields
@@ -35,6 +35,8 @@ namespace BoomKey.Models
 
         public string? PathToExetubaleObj { get; set; }
 
+        public string? PathToIcon { get; set; }
+
         public HotKey HotKey
         {
             get => hotKey;
@@ -42,11 +44,11 @@ namespace BoomKey.Models
         }
 
         [JsonIgnore]
-        public ImageSource? Icon
+        public ImageSource Icon
         {
             get => icon;
             set => Set(ref icon, value);
-        }      
+        }
         #endregion Public
 
         #endregion Properties
@@ -56,8 +58,37 @@ namespace BoomKey.Models
         #region Public
         public Shortcut()
         {
-            uriStrToQuestionIcon = $"pack://application:,,,/{App.Name};component/Assets/Icons/QuestionIcon.ico";
             CreationDate = DateTime.Today.ToString("F");
+            Icon = new BitmapImage(new Uri(uriStrToQuestionIcon));
+            HotKey = new HotKey();
+        }
+
+        public Shortcut(Shortcut shortcut)
+        {
+            shortcut ??= new Shortcut();
+            Name = shortcut.Name;
+            CreationDate = shortcut.CreationDate;
+            PathToExetubaleObj = shortcut.PathToExetubaleObj;
+            PathToIcon = shortcut.PathToIcon;
+            Icon = shortcut.Icon.Clone();
+            HotKey = new HotKey(shortcut.HotKey);
+        }
+
+        public Shortcut(string name, string pathToExetubaleObj)
+        {
+            Name = name;
+            CreationDate = DateTime.Now.ToString("F");
+            PathToExetubaleObj = pathToExetubaleObj;
+            ImageSource? icon = GetIcon(pathToExetubaleObj);
+            if (icon == null)
+            {
+                Icon = new BitmapImage(new Uri(uriStrToQuestionIcon));
+            }
+            else
+            {
+                Icon = icon;
+                PathToIcon = pathToExetubaleObj;
+            }
             HotKey = new HotKey();
         }
         #endregion Public
@@ -66,27 +97,27 @@ namespace BoomKey.Models
 
         #region Methods
 
-        #region Protected
-        protected static ImageSource? GetIcon(string pathToExetubaleObj)
+        #region Private
+        private static ImageSource? GetIcon(string pathToIcon)
         {
             ImageSource? icon = null;
 
-            if (pathToExetubaleObj != null)
+            if (pathToIcon != null)
             {
-                if (Directory.Exists(pathToExetubaleObj))
+                if (File.Exists(pathToIcon))
                 {
                     try
                     {
-                        icon = appDevToolsExts.Directory.GetIcon(pathToExetubaleObj);
+                        icon = appDevToolsExts.File.GetIcon(pathToIcon);
                     }
                     catch { }
                 }
 
-                if (File.Exists(pathToExetubaleObj))
+                if (Directory.Exists(pathToIcon))
                 {
                     try
                     {
-                        icon = appDevToolsExts.File.GetIcon(pathToExetubaleObj);
+                        icon = appDevToolsExts.Directory.GetIcon(pathToIcon);
                     }
                     catch { }
                 }
@@ -94,24 +125,31 @@ namespace BoomKey.Models
 
             return icon;
         }
-        #endregion Protected
+        #endregion Private
 
         #region Public
         public void RestoreIcon()
         {
-            if (File.Exists(PathToExetubaleObj))
+            ImageSource? icon = null;
+
+            if (File.Exists(PathToIcon))
             {
-                Icon = appDevToolsExts.File.GetIcon(PathToExetubaleObj);
+                icon = appDevToolsExts.File.GetIcon(PathToIcon);
             }
 
-            if (Directory.Exists(PathToExetubaleObj))
+            if (Directory.Exists(PathToIcon))
             {
-                Icon = appDevToolsExts.Directory.GetIcon(PathToExetubaleObj);
+                icon = appDevToolsExts.Directory.GetIcon(PathToIcon);
             }
 
-            if (!File.Exists(PathToExetubaleObj) && !Directory.Exists(PathToExetubaleObj))
+            if (icon != null)
+            {
+                Icon = icon;
+            }
+            else
             {
                 Icon = new BitmapImage(new Uri(uriStrToQuestionIcon));
+                PathToIcon = null;
             }
         }
 
@@ -120,6 +158,18 @@ namespace BoomKey.Models
             MessageBox.Show
             (
                 $"{Application.Current.Resources["ErrorAboutExistingObjDescription"]}",
+                App.Name,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error,
+                MessageBoxResult.OK
+            );
+        }
+
+        public static void ShowErrorAboutFailedGettingIcon()
+        {
+            MessageBox.Show
+            (
+                $"{Application.Current.Resources["ErrorAboutFailedGettingIconForObj"]}",
                 App.Name,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error,

@@ -3,29 +3,21 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AppDevTools.Templates.MVVM.ViewModel.Base;
+using AppDevTools.Windows.LoadingWindow.Models;
 using sysTimers = System.Timers;
 
 namespace AppDevTools.Windows.LoadingWindow.ViewModels
 {
     public class LoadingWindowVM : ViewModel
     {
-        #region Constants
-
-        #region Private
-        private const string DEF_WINDOW_NAME = "LoadingWindow";
-        private const string DEF_TITLE = "Title";
-        private const string DEF_ANNOTATION = "Annonation";
-        #endregion Private
-
-        #endregion Constants
-
         #region Fields
 
         #region Private
-        private string windowName = DEF_WINDOW_NAME;
+        private string windowName;
         private ImageSource? icon;
-        private string title = DEF_TITLE;
-        private string annotation = DEF_ANNOTATION;
+        private string title;
+        private string annotation;
+        private int loadingPercentage;
         private SolidColorBrush? elementBrush;
         private SolidColorBrush? elementBrush0;
         private SolidColorBrush? elementBrush1;
@@ -64,6 +56,12 @@ namespace AppDevTools.Windows.LoadingWindow.ViewModels
         {
             get => annotation;
             set => Set(ref annotation, value);
+        }
+
+        public int LoadingPercentage
+        {
+            get => loadingPercentage;
+            set => Set(ref loadingPercentage, value);
         }
 
         public SolidColorBrush? ElementBrush
@@ -124,25 +122,45 @@ namespace AppDevTools.Windows.LoadingWindow.ViewModels
         #region Public
         public LoadingWindowVM()
         {
+            Settings settings= new();
+
+            WindowName = settings.WindowName;
+            Title = settings.Title;
+            Annotation = settings.Annotation;
             OwnerThread = Thread.CurrentThread;
 
-            SetElementsColors();
+            SetDefElementsColors();
             SetAnimTimer();
         }
 
-        public LoadingWindowVM(string windowName, ImageSource icon, string title, string annotation)
+        public LoadingWindowVM(Settings settings)
         {
-            windowName ??= DEF_WINDOW_NAME;
-            title ??= DEF_TITLE;
-            annotation ??= DEF_ANNOTATION;
+            settings ??= new Settings();
 
-            WindowName = windowName;
-            Icon = icon;
-            Title = title;
-            Annotation = annotation;
+            WindowName = settings.WindowName;
+            Icon = settings.Icon;
+            Title = settings.Title;
+            Annotation = settings.Annotation;
+
+            if (settings.ElementBrush != null)
+            {
+                ElementBrush = new SolidColorBrush(Color.FromArgb(255, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush0 = new SolidColorBrush(Color.FromArgb(223, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush1 = new SolidColorBrush(Color.FromArgb(191, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush2 = new SolidColorBrush(Color.FromArgb(159, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush3 = new SolidColorBrush(Color.FromArgb(128, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush4 = new SolidColorBrush(Color.FromArgb(97, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush5 = new SolidColorBrush(Color.FromArgb(66, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+                ElementBrush6 = new SolidColorBrush(Color.FromArgb(35, settings.ElementBrush.Color.R, settings.ElementBrush.Color.G, settings.ElementBrush.Color.B));
+            }
+
             OwnerThread = Thread.CurrentThread;
 
-            SetElementsColors();
+            if (settings.ElementBrush == null)
+            {
+                SetDefElementsColors();
+            }
+
             SetAnimTimer();
         }
         #endregion Public
@@ -169,9 +187,9 @@ namespace AppDevTools.Windows.LoadingWindow.ViewModels
             animValueTimer.Enabled = true;
         }
 
-        private void SetElementsColors()
+        private void SetDefElementsColors()
         {
-            Color defElementColor = new() { A = 255, R = 128, G = 128, B = 128 };
+            Color defElementColor = Settings.DefElementColor;
             ElementBrush = new SolidColorBrush(new Color { A = 255, R = defElementColor.R, G = defElementColor.G, B = defElementColor.B });
             ElementBrush6 = new SolidColorBrush(new Color { A = 223, R = defElementColor.R, G = defElementColor.G, B = defElementColor.B });
             ElementBrush5 = new SolidColorBrush(new Color { A = 191, R = defElementColor.R, G = defElementColor.G, B = defElementColor.B });
@@ -195,50 +213,50 @@ namespace AppDevTools.Windows.LoadingWindow.ViewModels
 
             static SolidColorBrush? GetBrush(SolidColorBrush? oldBrush)
             {
-                if (oldBrush != null && oldBrush is SolidColorBrush)
+                if (oldBrush == null)
                 {
-                    Color newColor = oldBrush.Color;
-
-                    switch (oldBrush.Color.A)
-                    {
-                        case 255:
-                            newColor.A = 223;
-                            break;
-
-                        case 223:
-                            newColor.A = 191;
-                            break;
-
-                        case 191:
-                            newColor.A = 159;
-                            break;
-
-                        case 159:
-                            newColor.A = 128;
-                            break;
-
-                        case 128:
-                            newColor.A = 97;
-                            break;
-
-                        case 97:
-                            newColor.A = 66;
-                            break;
-
-                        case 66:
-                            newColor.A = 35;
-                            break;
-
-                        case 35:
-                            newColor.A = 255;
-                            break;
-
-                    }
-
-                    return new SolidColorBrush(newColor);
+                    return null;
                 }
 
-                return null;
+                Color newColor = oldBrush.Color;
+
+                switch (oldBrush.Color.A)
+                {
+                    case 255:
+                        newColor.A = 223;
+                        break;
+
+                    case 223:
+                        newColor.A = 191;
+                        break;
+
+                    case 191:
+                        newColor.A = 159;
+                        break;
+
+                    case 159:
+                        newColor.A = 128;
+                        break;
+
+                    case 128:
+                        newColor.A = 97;
+                        break;
+
+                    case 97:
+                        newColor.A = 66;
+                        break;
+
+                    case 66:
+                        newColor.A = 35;
+                        break;
+
+                    case 35:
+                        newColor.A = 255;
+                        break;
+
+                }
+
+                return new SolidColorBrush(newColor);
             }
         }
         #endregion Private

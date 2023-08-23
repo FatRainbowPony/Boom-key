@@ -20,4 +20,5 @@
     <SolidColorBrush x:Key="SwitcherBorderBrush" Color="#FFDADBE5"/>
     <SolidColorBrush x:Key="ToolTipBackgroundBrush" Color="#FFEAEAEA"/>
     <SolidColorBrush x:Key="ToolTipBorderBrush" Color="#FFDADBE5"/>
+    <SolidColorBrush x:Key="LoadingElementBrush" Color="Gray"/>
 </ResourceDictionary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,11 +12,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using AppDevTools.Addons;
+using AppDevTools.Addons.AppUpdateLoader;
 using AppDevTools.Windows.LoadingWindow.ViewModels;
 using AppDevTools.Windows.LoadingWindow.Views;
+using AppUpdateInstaller.Models;
 using BoomKey.Models;
 using SingleInstanceCore;
 using appDevToolsExts = AppDevTools.Extensions;
+using appUpdateLoader = AppDevTools.Addons.AppUpdateLoader;
+using loadingWin = AppDevTools.Windows.LoadingWindow;
 
 namespace BoomKey
 {
@@ -27,6 +32,10 @@ namespace BoomKey
         #region Constants
 
         #region Private
+        private const string DEF_DEVELOPER_NICKNAME = "FatRainbowPony";
+        private const string DEF_REPOSITORY_NAME = "Boom-key";
+        private const string DEF_SOURCE_NAME = DEF_REPOSITORY_NAME;
+        private const string DEF_DIRNAME_UPDATE = "update";
         private const string DEF_DIRNAME_INFO = "info";
         private const string DEF_FILENAME_INFO_SHORTCUTS = "shortcuts.info";
         private const string DEF_DIRNAME_INFO_WINDOWS = "windows";
@@ -38,32 +47,42 @@ namespace BoomKey
 
         #endregion Constants
 
-        #region Fields
-
-        #region Private
-        private string uriStrToAppIcon;
-        #endregion Private
-
-        #endregion Fields
-
         #region Properties
 
         #region Public
+        public static string DeveloperNickname { get; private set; }
+
+        public static string RepositoryName { get; private set; }
+
+        public static string SourceName { get; private set; }
+
         public static string Name { get; private set; }
+
+        public static string PathToDir { get; private set; }
 
         public static string Location { get; private set; }
 
         public static string Version { get; private set; }
 
+        public static string PathToIconAsFile { get; private set; }
+
+        public static string PathToIconAsResource { get; private set; }
+
+        public static BitmapImage Icon { get; private set; }
+
         public static bool IsFirstInstance { get; private set; }
         
         public static string PathToWorkingDir { get; private set; }
+
+        public static string PathToSourceDir { get; private set; }
+
+        public static string PathToUpdateDir { get; private set; }
 
         public static string PathToInfoDir { get; private set; }
 
         public static string PathToInfoShortcuts { get; private set; }
 
-        public static ShortcutsInfo? ShortcutsInfo { get; private set; }
+        public static List<Section>? InfoShortcuts { get; private set; }
 
         public static string PathToInfoWindowsDir { get; private set; }
 
@@ -78,6 +97,9 @@ namespace BoomKey
         //public static string PathToSettings { get; private set; }
 
         //public static Settings Settings { get; set; }
+
+        public static UpdateLoader UpdateLoader { get; private set; }
+
         #endregion Public
 
         #endregion Properties
@@ -112,16 +134,24 @@ namespace BoomKey
                 //{
                 //    Settings = new Settings();
                 //}
-                //appDevToolsExts.File.Save(PathToSettings, new List<Settings> { Settings });             
+                //appDevToolsExts.File.Save(PathToSettings, new List<Settings> { Settings });
+                
+                DeveloperNickname = DEF_DEVELOPER_NICKNAME;
+                RepositoryName = DEF_REPOSITORY_NAME;
+                SourceName = DEF_SOURCE_NAME;
 
-                Location = $"{Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)}\\{GetType().Assembly.GetName().Name}.exe";
+                PathToDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                Location = Path.Combine(PathToDir, $"{GetType().Assembly.GetName().Name}.exe");
+
                 Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
                 if (assemblyVersion != null)
                 {
                     Version = assemblyVersion.ToString();
                 }
 
-                uriStrToAppIcon = $"pack://application:,,,/{Name};component/AppIcon.ico";
+                PathToIconAsFile = $"{PathToDir}\\Assets\\Icons\\DefAppIcon.ico";
+                PathToIconAsResource = $"pack://application:,,,/{Name};component/Assets/Icons/TrayAppIcon.ico";
+                Icon = new BitmapImage(new Uri(PathToIconAsResource));
 
                 Theme sysTheme = Theme.Get();
                 if (!sysTheme.IsEqual(Current, Current.Resources.MergedDictionaries.ToList()))
@@ -137,27 +167,39 @@ namespace BoomKey
                 }
                 autorun.Set(Name, Location);
 
-                Thread loadingThread = new(() => 
+                Thread appLoadingThread = new(() => 
                 {
-                    LoadingWindowVM loadingWinContext = new($"{Current.Resources["LoadingWindowTitle"]}", new BitmapImage(new Uri(uriStrToAppIcon)), Name, $"{Current.Resources["LoadingDescription"]}");
-                    LoadingWindow loadingWindow = new() { Topmost = true, DataContext = loadingWinContext };
-                    LoadingIsOver += () =>
+                    LoadingWindowVM loadingWinContext = new(new loadingWin.Models.Settings($"{Current.Resources["LoadingAppDataWindowTitle"]}", new BitmapImage(new Uri(PathToIconAsResource)), Name, $"{Current.Resources["LoadingAppDataDescription"]}", (SolidColorBrush)Current.Resources["LoadingElementBrush"]));
+                    LoadingWindow loadingWindow = new() { DataContext = loadingWinContext };
+                    AppLoadingIsOver += () =>
                     {
                         loadingWinContext.StopAnimation();
                         Dispatcher.FromThread(loadingWinContext.OwnerThread).Invoke(() => loadingWindow?.Close());
                     };
                     loadingWindow.ShowDialog();
                 });
-                loadingThread.SetApartmentState(ApartmentState.STA);
-                loadingThread.Start();
+                appLoadingThread.SetApartmentState(ApartmentState.STA);
+                appLoadingThread.Start();
 
                 PathToWorkingDir = appDevToolsExts.Directory.GetPathToDirInAppData(Name, true)!;
+
+                PathToSourceDir = Path.Combine(PathToWorkingDir, InstallerInfo.NameSource);
+                if (!Directory.Exists(PathToSourceDir))
+                {
+                    Directory.CreateDirectory(PathToSourceDir);
+                }
+
+                PathToUpdateDir = Path.Combine(PathToWorkingDir, DEF_DIRNAME_UPDATE);
+                if (Directory.Exists(PathToUpdateDir))
+                {
+                    Directory.Delete(PathToUpdateDir, true);
+                }
+                Directory.CreateDirectory(PathToUpdateDir);
 
                 PathToInfoDir = Path.Combine(PathToWorkingDir, DEF_DIRNAME_INFO);
                 if (!Directory.Exists(PathToInfoDir))
                 {
-                    DirectoryInfo directoryInfo = Directory.CreateDirectory(PathToInfoDir);
-                    directoryInfo.Attributes = FileAttributes.Hidden;
+                    Directory.CreateDirectory(PathToInfoDir);
                 }
 
                 PathToInfoShortcuts = Path.Combine(PathToInfoDir, DEF_FILENAME_INFO_SHORTCUTS);
@@ -165,32 +207,20 @@ namespace BoomKey
                 {
                     File.Create(PathToInfoShortcuts).Close();
                 }
-                List<ShortcutsInfo>? contentShortcutsInfo = appDevToolsExts.File.Load<ShortcutsInfo>(PathToInfoShortcuts);
-                if (contentShortcutsInfo != null && contentShortcutsInfo.FirstOrDefault() != null)
+                List<Section>? sections = appDevToolsExts.File.Load<Section>(PathToInfoShortcuts);
+                if (sections != null)
                 {
-                    ShortcutsInfo = contentShortcutsInfo.First();
+                    InfoShortcuts = sections;
 
-                    if (ShortcutsInfo.FavoriteShortcuts != null || ShortcutsInfo.ShortcutSections != null)
+                    foreach (Section section in sections)
                     {
-                        if (ShortcutsInfo.FavoriteShortcuts != null)
+                        if (section.Shortcuts != null)
                         {
-                            foreach (FavoriteShortcut favoriteShortcut in ShortcutsInfo.FavoriteShortcuts)
+                            section.Shortcuts = new ObservableCollection<Shortcut>(section.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
+                            
+                            foreach (Shortcut shortcut in section.Shortcuts)
                             {
-                                favoriteShortcut.RestoreIcon();
-                            }
-                        }
-
-                        if (ShortcutsInfo.ShortcutSections != null)
-                        {
-                            foreach (Section shortcutSection in ShortcutsInfo.ShortcutSections)
-                            {
-                                if (shortcutSection.Shortcuts != null)
-                                {
-                                    foreach (NormalShortcut shortcut in shortcutSection.Shortcuts)
-                                    {
-                                        shortcut.RestoreIcon();
-                                    }
-                                }
+                                shortcut.RestoreIcon();
                             }
                         }
                     }
@@ -230,9 +260,11 @@ namespace BoomKey
                 }
                 appDevToolsExts.File.Save(PathToInfoColors, PersonalizationColors);
 
+                UpdateLoader = new(new appUpdateLoader.Models.Settings("1.0.0", DeveloperNickname, RepositoryName, SourceName, Path.Combine(PathToUpdateDir, $"update.zip")));
+
                 Task.Delay(2000).Wait();
 
-                LoadingIsOver?.Invoke();
+                AppLoadingIsOver?.Invoke();
             }
         }
         #endregion Method for startup application
@@ -260,7 +292,7 @@ namespace BoomKey
         #region Events
 
         #region Private
-        private event Action? LoadingIsOver;
+        private event Action? AppLoadingIsOver;
         #endregion Private
 
         #endregion Events

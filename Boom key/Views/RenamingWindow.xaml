@@ -35,8 +35,8 @@
 
     <!--#region Hotkeys -->
     <Window.InputBindings>
-        <KeyBinding Command="{Binding UnconfirmChangesNameComm}" Key="Esc"/>
-        <KeyBinding Command="{Binding ConfirmChangesNameComm}" Key="Enter"/>
+        <KeyBinding Key="Esc" Command="{Binding UnconfirmChangesNameComm}"/>
+        <KeyBinding Key="Enter" Command="{Binding ConfirmChangesNameComm}"/>
     </Window.InputBindings>
     <!--#endregion Hotkeys -->
 

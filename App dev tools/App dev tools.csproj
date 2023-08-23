@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <SignAssembly>False</SignAssembly>
     <AssemblyName>AppDevTools</AssemblyName>
-    <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +29,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NHotkey.Wpf" Version="2.1.0" />
     <PackageReference Include="Notification.Wpf" Version="7.0.0" />
+    <PackageReference Include="Octokit" Version="7.1.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
     <PackageReference Include="SingleInstanceCore" Version="2.2.2" />

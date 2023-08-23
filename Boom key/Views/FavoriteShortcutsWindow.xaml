@@ -9,7 +9,6 @@
     xmlns:controlbehaviors="clr-namespace:AppDevTools.Behaviors.Control;assembly=AppDevTools"
     xmlns:winbehaviors="clr-namespace:AppDevTools.Behaviors.Window;assembly=AppDevTools"
     xmlns:menuitems="clr-namespace:AppDevTools.Controls.MenuItems;assembly=AppDevTools"
-    xmlns:addons="clr-namespace:AppDevTools.Addons;assembly=AppDevTools"
     xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow;assembly=AppDevTools"
     xmlns:vm="clr-namespace:BoomKey.ViewModels"
     xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
@@ -18,8 +17,7 @@
     Height="500" MinHeight="150"
     Width="80" MinWidth="80" MaxWidth="80"
     Style="{StaticResource WinNoteStandardStyle}"
-    addons:WindowBlur.IsEnabled="True"
-    Background="Transparent"
+    Background="{DynamicResource WindowBackgroundBrush}"
     BorderBrush="{DynamicResource WindowBorderBrush}"
     BorderThickness="1"
     WindowRoundingCorners="5"
@@ -45,10 +43,6 @@
     
     <!--#region Main working panel -->
     <Grid x:Name="MainWorkingPanel">
-        <Border
-            Background="{DynamicResource WindowBackgroundBrush}"
-            Opacity="0.85"
-            CornerRadius="0, 0, 5, 5"/>
         <ListBox 
             x:Name="Shortcuts"
             Grid.Row="0"

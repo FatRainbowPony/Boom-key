@@ -1,17 +1,17 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--#region Titles -->
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingWindowTitle">
-        Загрузочное окно
+    <!--#region Titles -->  
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingAppDataWindowTitle">
+        Окно загрузки данных приложения
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingUpdateWindowTitle">
+        Окно загрузки обновления
     </system:String>
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MainWindowTitle">
         Главная страница
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FavoriteShortcutsTitle">
-        Избранное
     </system:String>
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="RenamingWindowTitle">
@@ -34,10 +34,6 @@
         Настройки
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CommunicationWithDeveloperWindowTitle">
-        Связь с разработчиком
-    </system:String>
-
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AboutProgramWindowTitle">
         О программе
     </system:String>
@@ -54,36 +50,60 @@
         Скрыть
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="RestartAppDescription">
-        Перезапустить
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CloseAppDescription">
-        Закрыть
-    </system:String>
-
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SettingsDescription">
         Настройки
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="HelpDescription">
-        Помощь
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DeveloperCommunicationDescription">
-        Связь с разработчиком
     </system:String>
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AboutProgramDescription">
         О программе
     </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CloseAppDescription">
+        Закрыть
+    </system:String>
     <!--#endregion Description for tray menu -->
 
-    <!--#region Description for loading window -->
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingDescription">
+    <!--#region Description for loading application data -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingAppDataDescription">
         Подождите, идет загрузка данных приложения...
     </system:String>
-    <!--#endregion Description for loading window -->
+    <!--#endregion Description for loading application data -->
+
+    <!--#region Description for loading application update -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="NotificationTitleUpdateDescription">
+        Обновление
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="UpdateDescription">
+        Доступна новая версия 
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DownloadUpdateDescription">
+        Загрузить
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LoadingUpdateDescription">
+        Подождите, идет загрузка обновления приложения...
+    </system:String>
+    <!--#endregion Description for loading application update-->
+
+    <!--#region Description for loading application update -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ResultLoadingUpdateDescription1">
+        Новая версия
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ResultLoadingUpdateDescription2">
+        успешно загружена
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="InstallUpdateDescription">
+        Установить
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="InsallationUpdateDescription">
+        Подождите, идет установка обновления приложения...
+    </system:String>
+    <!--#endregion Description for loading application update -->
 
     <!--#region Description for main window -->
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="WarningAboutEmptySectionDescription">
@@ -98,16 +118,20 @@
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="RecomendationAboutAddingShortcutsInSectionsDescription" xml:space="preserve">Добавьте содержимое,&#10;чтобы начать работу</system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AddObjDescription">
-        Добавить в
-    </system:String>
-
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ExectueObjDescription">
         Открыть
     </system:String>
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="RenameObjDescription">
         Переименовать
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MoveObjDescription">
+        Переместить в
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DelObjDescription">
+        Удалить
     </system:String>
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MoveToPlacementObjDescription">
@@ -120,50 +144,34 @@
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ErrorAboutExistingObjDescription" xml:space="preserve">Выбранный элемент не существует.&#10;Проверьте, правильно указано имя и повторите попытку</system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ErrorAboutExisitingObjWithSameHotKeyDescription" xml:space="preserve">Элемент с такой комбинацией клавиш уже существует.&#10;Попробуйте выбрать другую комбинацию клавиш</system:String>
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ErrorAboutFailedGettingIconForObj" xml:space="preserve">Не удалось получить иконку из файла.&#10;Возможно, файл поврежден или не существует</system:String>
     
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FavoriteShortcutsDescription">
-        Избранное
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AddShortcutInFavoriteDescription">
-        Добавить в избранное
-    </system:String>
-        
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DelShortcutFromFavoriteDescription">
-        Удалить из избранного 
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DelShortcutFromSectionDescription">
-        Удалить из раздела
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="OpenFavoriteShortcutsInWinDescription">
-        Открыть в отдельном окне
-    </system:String>
-    
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ShortcutSectionsDescription">
-        Разделы
-    </system:String>
-
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DefShortcutSectionNameDescription">
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DefSectionNameDescription">
         Новый раздел
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="RenameShortcutSectionDescription">
-        Переименовать раздел
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AddSectionDescription">
+        Создать
+    </system:String>
+    
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DuplicateSectionDescription">
+        Дублировать
+    </system:String>
+    
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ColorSectionDescription">
+        Цвет
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AddShortcutSectionDescription">
-        Добавить раздел
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CountShortcutsInSectionDescription">
+        Элементов
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DelShortcutSectionDescription">
-        Удалить раздел
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ShowShortcutsAsBoardDescription">
+        Отображение элементов в виде плитки
     </system:String>
 
-    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ColorShortcutSectionDescription">
-        Цвет раздела
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ShowShortuctsAsListDescription">
+        Отображение элементов в виде списка
     </system:String>
     <!--#endregion Description for main window -->
 
@@ -185,15 +193,19 @@
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CreationDateShortcutDescription">
         Создан
     </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectShortcutIconDescription">
+        Выбрать файл иконки
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FilterForShortcutIconDescription">
+        Все файлы (*.*)|*.*
+    </system:String>
     <!--#endregion Description for shortcut properties window -->
 
     <!--#region Description for settings window -->
 
     <!--#endregion Description for settings window -->
-
-    <!--#region Description for communication with developer window -->
-
-    <!--#endregion Description for communication with developer window -->
 
     <!--#region Description for about program window -->
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AppDescription" xml:space="preserve">Предназначено для управления&#10;комбинациями клавиш</system:String>
@@ -205,7 +217,7 @@
 
     <!--#endregion Description -->
 
-    <!--#region ToolTips -->
+    <!--#region ToolTips  -->
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ConfirmActionToolTip">
         Подтвердить (Enter)
     </system:String>
@@ -214,6 +226,12 @@
         Отменить (Esc)
     </system:String>
 
+    <!--#region ToolTips for update loader window -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="InstallUpdateToolTip">
+        Перейти к установке (Enter)
+    </system:String>
+    <!--#endregion ToolTips for update loader window -->
+
     <!--#region ToolTips for main window -->
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="DefHotKeyToolTip">
         Горячая клавиша: Нет
@@ -221,6 +239,10 @@
 
     <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CountShortcutsInSectionToolTip">
         Кол-во элементов
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CountShortcutsInSectionExtraToolTip">
+        Общее кол.-во элементов
     </system:String>
     <!--#endregion ToolTips for main window -->
     
@@ -239,10 +261,6 @@
     <!--#region ToolTips for settings window -->
 
     <!--#endregion ToolTips for settings window -->
-
-    <!--#region ToolTips for communication with developer window -->
-
-    <!--#endregion ToolTips for communication with developer window -->
 
     <!--#endregion ToolTips -->
 

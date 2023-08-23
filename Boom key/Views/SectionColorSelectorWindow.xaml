@@ -34,8 +34,8 @@
 
     <!--#region Hotkeys -->
     <Window.InputBindings>
-        <KeyBinding Command="{Binding UnconfirmSelectedColorComm}" Key="Esc"/>
-        <KeyBinding Command="{Binding ConfirmSelectedColorComm}" Key="Enter"/>
+        <KeyBinding Key="Esc" Command="{Binding UnconfirmSelectedColorComm}"/>
+        <KeyBinding Key="Enter" Command="{Binding ConfirmSelectedColorComm}"/>
     </Window.InputBindings>
     <!--#endregion Hotkeys -->
 

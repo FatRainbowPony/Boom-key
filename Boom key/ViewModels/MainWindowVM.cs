@@ -12,11 +12,13 @@ using AppDevTools.Addons;
 using AppDevTools.Generators;
 using AppDevTools.Templates.MVVM.ViewModel.Base;
 using AppDevTools.Templates.MVVM.ViewModel.Commands;
+using AppUpdateInstaller.Models;
 using BoomKey.Models;
 using BoomKey.Views;
 using GongSolutions.Wpf.DragDrop;
 using NHotkey;
 using NHotkey.Wpf;
+using Notification.Wpf;
 using WindowsDesktop;
 using appDevToolsExts = AppDevTools.Extensions;
 
@@ -31,12 +33,9 @@ namespace BoomKey.ViewModels
         private string appName = App.Name;
         private string pathToWindowInfo = App.PathToInfoMainWindow;
         private BackgroundWorker inspectorAboutAppTheme;
-        private ObservableCollection<FavoriteShortcut> favoriteShortcuts = new();
-        private FavoriteShortcut? selectedFavoriteShortcut;
-        private bool showDragDropEffectsForFavoriteShortcuts;
-        private ObservableCollection<Section> shortcutSections = new();
-        private Section? selectedShortcutSection;
-        private NormalShortcut? selectedShortcutInSection;
+        private ObservableCollection<Section> sections = new();
+        private Section? selectedSection;
+        private Shortcut? selectedShortcut;
         private readonly List<string> pathsToDroppingObjs = new();
         #endregion Private
 
@@ -63,40 +62,22 @@ namespace BoomKey.ViewModels
             set => Set(ref pathToWindowInfo, value);
         }
 
-        public ObservableCollection<FavoriteShortcut> FavoriteShortcuts
+        public ObservableCollection<Section> Sections
         {
-            get => favoriteShortcuts;
-            set => Set(ref favoriteShortcuts, value);
+            get => sections;
+            set => Set(ref sections, value);
         }
 
-        public FavoriteShortcut? SelectedFavoriteShortcut
+        public Section? SelectedSection
         {
-            get => selectedFavoriteShortcut;
-            set => Set(ref selectedFavoriteShortcut, value);
+            get => selectedSection;
+            set => Set(ref selectedSection, value);
         }
 
-        public bool ShowDragDropEffectsForFavoriteShortcuts
+        public Shortcut? SelectedShortcut
         {
-            get => showDragDropEffectsForFavoriteShortcuts;
-            set => Set(ref showDragDropEffectsForFavoriteShortcuts, value);
-        }
-
-        public ObservableCollection<Section> ShortcutSections
-        {
-            get => shortcutSections;
-            set => Set(ref shortcutSections, value);
-        }
-
-        public Section? SelectedShortcutSection
-        {
-            get => selectedShortcutSection;
-            set => Set(ref selectedShortcutSection, value);
-        }
-
-        public NormalShortcut? SelectedShortcutInSection
-        {
-            get => selectedShortcutInSection;
-            set => Set(ref selectedShortcutInSection, value);
+            get => selectedShortcut;
+            set => Set(ref selectedShortcut, value);
         }
         #endregion Public
 
@@ -109,38 +90,22 @@ namespace BoomKey.ViewModels
         #region Method to restore info about shortcuts 
         private void RestoreInfoAboutShortcuts()
         {
-            if (App.ShortcutsInfo == null)
+            if (App.InfoShortcuts == null)
             {
                 return;
             }
 
-            if (App.ShortcutsInfo.FavoriteShortcuts != null)
+            foreach (Section section in App.InfoShortcuts)
             {
-                foreach (FavoriteShortcut favoriteShortcut in App.ShortcutsInfo.FavoriteShortcuts)
+                Sections.Add(section);
+
+                if (section.Shortcuts != null)
                 {
-                    FavoriteShortcuts.Add(favoriteShortcut);
-
-                    if (favoriteShortcut.HotKey.Combination.MultModifierKey != Addons.MultModifierKey.None)
+                    foreach (Shortcut shortcut in section.Shortcuts)
                     {
-                        HotkeyManager.Current.AddOrReplace(favoriteShortcut.HotKey.Name, (Key)favoriteShortcut.HotKey.Combination.Key, (ModifierKeys)favoriteShortcut.HotKey.Combination.MultModifierKey, ExecuteShortcutByHotKey);
-                    }
-                }
-            }
-
-            if (App.ShortcutsInfo.ShortcutSections != null)
-            {
-                foreach (Section shorcutSection in App.ShortcutsInfo.ShortcutSections)
-                {
-                    ShortcutSections.Add(shorcutSection);
-
-                    if (shorcutSection.Shortcuts != null)
-                    {
-                        foreach (NormalShortcut shortcut in shorcutSection.Shortcuts)
+                        if (shortcut.HotKey.Combination.MultModifierKey != Addons.MultModifierKey.None)
                         {
-                            if (shortcut.HotKey.Combination.MultModifierKey != Addons.MultModifierKey.None)
-                            {
-                                HotkeyManager.Current.AddOrReplace(shortcut.HotKey.Name, (Key)shortcut.HotKey.Combination.Key, (ModifierKeys)shortcut.HotKey.Combination.MultModifierKey, ExecuteShortcutByHotKey);
-                            }
+                            HotkeyManager.Current.AddOrReplace(shortcut.HotKey.Name, (Key)shortcut.HotKey.Combination.Key, (ModifierKeys)shortcut.HotKey.Combination.MultModifierKey, ExecuteShortcutByHotKey);
                         }
                     }
                 }
@@ -151,7 +116,7 @@ namespace BoomKey.ViewModels
         #region Method to save info about shortcuts
         private void SaveInfoAboutShortcuts()
         {
-            appDevToolsExts.File.Save(App.PathToInfoShortcuts, new List<ShortcutsInfo> { new ShortcutsInfo(favoriteShortcuts.ToList(), shortcutSections.ToList()) });
+            appDevToolsExts.File.Save(App.PathToInfoShortcuts, sections);
         }
         #endregion Method to save info about shorcuts
 
@@ -187,38 +152,98 @@ namespace BoomKey.ViewModels
         }
         #endregion Method to start the application theme inspector
 
+        #region Method to start the application update inspector
+        private void StartAppUpdateInspector()
+        {
+            App.UpdateLoader.UpdateAppeared += (update) =>
+            {
+                new NotificationManager().Show(new NotificationContent
+                {
+                    Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                    Message = $"{Application.Current.Resources["UpdateDescription"]} {update.Version}",
+                    Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                    Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                    Icon = App.Icon,
+                    RightButtonContent = $"{Application.Current.Resources["DownloadUpdateDescription"]}",
+                    RightButtonAction = () =>
+                    {
+                        App.UpdateLoader.DownloadUpdate
+                        (
+                            update,
+                            new NotificationContent 
+                            {
+                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                                Message = $"{Application.Current.Resources["LoadingUpdateDescription"]}",
+                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                                Icon = App.Icon
+                            },
+                            new NotificationContent
+                            {
+                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                                Message = $"{Application.Current.Resources["ResultLoadingUpdateDescription1"]} {update.Version} {Application.Current.Resources["ResultLoadingUpdateDescription2"]}",
+                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                                Icon = App.Icon,
+                                RightButtonContent = $"{Application.Current.Resources["InstallUpdateDescription"]}",
+                                RightButtonAction = () =>
+                                {
+                                    Process.Start(new ProcessStartInfo 
+                                    { 
+                                        Arguments = "\"" + Json.GetSerializedObj(new List<InstallerInfo>
+                                        {
+                                            // изменить App.PathToIconAsFile на $"{App.PathToUpdateDir}\\Assets\\Icons\\DefAppIcon.ico"
+                                            new InstallerInfo(App.Name, App.PathToIconAsFile, App.PathToUpdateDir,
+                                            new NotificationContent
+                                            {
+                                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                                                Message = $"{Application.Current.Resources["InsallationUpdateDescription"]}",
+                                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"]
+                                            })
+                                        }).Replace("\"", "\\\"") + "\"",
+                                        // изменить App.PathToDir на App.PathToUpdateDir
+                                        FileName = Path.Combine(App.PathToDir, $"{InstallerInfo.InstallerName}.exe") 
+                                    });
+                                    CloseAppComm.Execute(null);
+                                },
+                                CloseOnClick = true
+                            }
+                        );
+                    },
+                    CloseOnClick = true
+                },
+                null,
+                TimeSpan.MaxValue);
+            };
+            App.UpdateLoader.UpdateSearchIsOver += () =>
+            {
+                App.UpdateLoader.StopSearchingUpdate();
+            };
+            App.UpdateLoader.SearchUpdate();
+        }
+        #endregion Method to start the application update inspector
+
         #endregion Private
 
         #region Public
 
-        #region Method to get a general list of shortcuts 
-        public static List<Shortcut>? GetGeneralListOfShortcuts(List<FavoriteShortcut> favoriteShortcuts, List<Section> shortcutSections)
+        #region Method to get all shortcuts 
+        public static List<Shortcut>? GetAllShortcuts(List<Section> sections)
         {
-            List<Shortcut>? shortcuts = null;
-
-            if (favoriteShortcuts != null || shortcutSections != null)
+            if (sections == null)
             {
-                shortcuts = new List<Shortcut>();
-
-                if (favoriteShortcuts != null)
-                {
-                    shortcuts.AddRange(from favoriteShortcut in favoriteShortcuts select favoriteShortcut);
-                }
-
-                if (shortcutSections != null)
-                {
-                    shortcuts.AddRange(from Section shortcutSection in shortcutSections
-                                       where shortcutSection.Shortcuts != null
-                                       from NormalShortcut shortcut in shortcutSection.Shortcuts
-                                       select shortcut);
-                }
+                return null;
             }
 
-            return shortcuts;
+            return (from Section shortcutSection in sections
+                    where shortcutSection.Shortcuts != null
+                    from Shortcut shortcut in shortcutSection.Shortcuts
+                    select shortcut).ToList();
         }
-        #endregion Method to get a general list of shortcuts
+        #endregion Method to get all shortcuts
 
-        #region Method to drag over shortcuts and shortcut sections
+        #region Method to drag over shortcuts and sections
         public void DragOver(IDropInfo dropInfo)
         {
             if (dropInfo == null)
@@ -233,58 +258,21 @@ namespace BoomKey.ViewModels
 
             switch (dropInfo.Data)
             {
-                case FavoriteShortcut:
-                    if (dropInfo.TargetItem is Section targetSectionForFavoriteShortcut && targetSectionForFavoriteShortcut != null)
-                    {
-                        ShowDragDropEffectsForFavoriteShortcuts = true;
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                        dropInfo.Effects = DragDropEffects.Copy;
-                        dropInfo.EffectText = $"{Application.Current.Resources["AddObjDescription"]}";
-                        dropInfo.DestinationText = $"\"{targetSectionForFavoriteShortcut.Name}\"";
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForFavoriteShortcut && targetFavoriteShortcutsForFavoriteShortcut != null)
-                    {
-                        ShowDragDropEffectsForFavoriteShortcuts = false;
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                        dropInfo.Effects = DragDropEffects.Move;
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<NormalShortcut> targetShortcutsForFavoriteShortcut && targetShortcutsForFavoriteShortcut != null &&
-                        dropInfo.TargetItem is not NormalShortcut)
-                    {
-                        ShowDragDropEffectsForFavoriteShortcuts = true;
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                        dropInfo.Effects = DragDropEffects.Copy;
-                        dropInfo.EffectText = $"{Application.Current.Resources["AddObjDescription"]}";
-                        dropInfo.DestinationText = $"\"{selectedShortcutSection!.Name}\"";
-                    }
-                    break;
-
-                case NormalShortcut:
-                    if (dropInfo.TargetItem is Section targetSectionForShortcutForShortcut && targetSectionForShortcutForShortcut != null && targetSectionForShortcutForShortcut.Name != selectedShortcutSection!.Name)
-                    {
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                        dropInfo.Effects = DragDropEffects.Copy;
-                        dropInfo.EffectText = $"{Application.Current.Resources["AddObjDescription"]}";
-                        dropInfo.DestinationText = $"\"{targetSectionForShortcutForShortcut.Name}\"";
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForShortcut && targetFavoriteShortcutsForShortcut != null &&
-                        dropInfo.TargetItem is not FavoriteShortcut)
-                    {
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                        dropInfo.Effects = DragDropEffects.Copy;
-                        dropInfo.EffectText = $"{Application.Current.Resources["AddObjDescription"]}";
-                        dropInfo.DestinationText = $"{((string)Application.Current.Resources["FavoriteShortcutsDescription"]).ToLower()}";
-                    }
-                    break;
-
                 case Section:
-                    if (dropInfo.TargetCollection is ObservableCollection<Section> targetShortcutSectionsForShortcutSection && targetShortcutSectionsForShortcutSection != null)
+                    if (dropInfo.TargetCollection is ObservableCollection<Section> targetSections && targetSections != null)
                     {
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                         dropInfo.Effects = DragDropEffects.Move;
+                    }
+                    break;
+
+                case Shortcut:
+                    if (dropInfo.TargetItem is Section targetSection && targetSection != null && targetSection.Name != selectedSection!.Name)
+                    {
+                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                        dropInfo.Effects = DragDropEffects.Move;
+                        dropInfo.EffectText = $"{Application.Current.Resources["MoveObjDescription"]}";
+                        dropInfo.DestinationText = $"\"{targetSection.Name}\"";
                     }
                     break;
 
@@ -299,22 +287,14 @@ namespace BoomKey.ViewModels
                         }
                     }
 
-                    if (dropInfo.TargetItem is Section targetShortcutSectionForDef && targetShortcutSectionForDef != null &&
-                        pathsToDroppingObjs.Distinct().ToList().Count > 0)
+                    if (dropInfo.TargetItem is Section _targetSection && _targetSection != null && pathsToDroppingObjs.Distinct().ToList().Count > 0)
                     {
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
                         dropInfo.Effects = DragDropEffects.Copy;
                     }
 
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForDef && targetFavoriteShortcutsForDef != null &&
-                        dropInfo.TargetItem is not FavoriteShortcut && pathsToDroppingObjs.Distinct().ToList().Count > 0)
-                    {
-                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                        dropInfo.Effects = DragDropEffects.Copy;
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<NormalShortcut> targetShortcutsForDef && targetShortcutsForDef != null &&
-                        dropInfo.TargetItem is not NormalShortcut && pathsToDroppingObjs.Distinct().ToList().Count > 0)
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts && targetShortcuts != null &&
+                        dropInfo.TargetItem is not Shortcut && pathsToDroppingObjs.Distinct().ToList().Count > 0)
                     {
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
                         dropInfo.Effects = DragDropEffects.Copy;
@@ -322,113 +302,67 @@ namespace BoomKey.ViewModels
                     break;
             }
         }
-        #endregion Method to drag over shortcuts and shortcut sections
+        #endregion Method to drag over shortcuts and sections
 
-        #region Method to drop shortcuts and shortcut sections
+        #region Method to drop shortcuts and sections
         public void Drop(IDropInfo dropInfo)
         {
             switch (dropInfo.Data)
             {
-                case FavoriteShortcut favoriteShortcut:
-                    if (dropInfo.TargetItem is Section targetSectionForFavoriteShortcut)
+                case Section droppingSection:
+                    if (dropInfo.TargetCollection is ObservableCollection<Section> targetSections)
                     {
-                        targetSectionForFavoriteShortcut.Shortcuts.Add(new(favoriteShortcut) { Name = NameGenerator.Start(favoriteShortcut.Name!, (from shortcut in targetSectionForFavoriteShortcut.Shortcuts select shortcut.Name).ToList()) });
-                        targetSectionForFavoriteShortcut.Shortcuts.ToList().OrderBy(x => x.Name);
-                        SelectedShortcutSection = targetSectionForFavoriteShortcut;
-                        AppDataChanged?.Invoke();
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForFavoriteShortcut)
-                    {
-                        targetFavoriteShortcutsForFavoriteShortcut.Remove(favoriteShortcut);
+                        targetSections.Remove(droppingSection);
                         try
                         {
-                            targetFavoriteShortcutsForFavoriteShortcut.Insert(dropInfo.InsertIndex, favoriteShortcut);
+                            targetSections.Insert(dropInfo.InsertIndex, droppingSection);
                         }
                         catch
                         {
-                            targetFavoriteShortcutsForFavoriteShortcut.Add(favoriteShortcut);
+                            targetSections.Add(droppingSection);
                         }
-
-                        AppDataChanged?.Invoke();
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<NormalShortcut> targetShortcutsForFavoriteShortcut)
-                    {          
-                        targetShortcutsForFavoriteShortcut.Add(new(favoriteShortcut) { Name = NameGenerator.Start(favoriteShortcut.Name!, (from shortcut in targetShortcutsForFavoriteShortcut select shortcut.Name).ToList()) });
-                        targetShortcutsForFavoriteShortcut.ToList().OrderBy(x => x.Name);
+                        SelectedSection = targetSections.ToList().Find(x => x.Name == droppingSection.Name);
                         AppDataChanged?.Invoke();
                     }
                     break;
 
-                case NormalShortcut shortcutInSection:
-                    if (dropInfo.TargetItem is Section targetSectionForShortcut)
+                case Shortcut droppingShortcut:
+                    if (dropInfo.TargetItem is Section targetSection)
                     {
-                        targetSectionForShortcut.Shortcuts.Add(new(shortcutInSection) { Name = NameGenerator.Start(shortcutInSection.Name!, (from shortcut in targetSectionForShortcut.Shortcuts select shortcut.Name).ToList()) });
-                        targetSectionForShortcut.Shortcuts.ToList().OrderBy(x => x.Name);
-                        SelectedShortcutSection = targetSectionForShortcut;
-                        AppDataChanged?.Invoke();
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForShortcut)
-                    {
-                        targetFavoriteShortcutsForShortcut.Add(new(shortcutInSection) { Name = NameGenerator.Start(shortcutInSection.Name!, (from favoriteShortcut in targetFavoriteShortcutsForShortcut select favoriteShortcut.Name).ToList()) });
-                        AppDataChanged?.Invoke();
-                    }
-                    break;
-
-                case Section shortcutSection:
-                    if (dropInfo.TargetCollection is ObservableCollection<Section> targetShortcutSectionsForShortcutSection)
-                    {
-                        targetShortcutSectionsForShortcutSection.Remove(shortcutSection);
-                        try
-                        {
-                            targetShortcutSectionsForShortcutSection.Insert(dropInfo.InsertIndex, shortcutSection);
-                        }
-                        catch
-                        {
-                            targetShortcutSectionsForShortcutSection.Add(shortcutSection);
-                        }
-                        SelectedShortcutSection = targetShortcutSectionsForShortcutSection.ToList().Find(x => x.Name == shortcutSection.Name);
+                        Shortcut newShortcut = new(droppingShortcut) { Name = NameGenerator.Start(droppingShortcut.Name!, (from _shortcut in targetSection.Shortcuts select _shortcut.Name).ToList()) };
+                        SelectedSection!.Shortcuts.Remove(droppingShortcut);
+                        targetSection.Shortcuts.Add(newShortcut);
+                        targetSection.Shortcuts = new ObservableCollection<Shortcut>(targetSection.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
+                        SelectedSection = targetSection;
                         AppDataChanged?.Invoke();
                     }
                     break;
 
                 default:
-                    if (dropInfo.TargetItem is Section targetShortcutSectionForDef)
+                    if (dropInfo.TargetItem is Section _targetSection)
                     {
                         foreach (string pathToObj in pathsToDroppingObjs)
                         {
-                            targetShortcutSectionForDef.Shortcuts.Add(new NormalShortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in targetShortcutSectionForDef.Shortcuts select shortcut.Name).ToList()), pathToObj));
+                            _targetSection.Shortcuts.Add(new Shortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in _targetSection.Shortcuts select shortcut.Name).ToList()), pathToObj));
                         }
-                        targetShortcutSectionForDef.Shortcuts.ToList().OrderBy(x => x.Name);
-                        SelectedShortcutSection = targetShortcutSectionForDef;                     
+                        _targetSection.Shortcuts = new ObservableCollection<Shortcut>(_targetSection.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
+                        SelectedSection = _targetSection;                     
                         AppDataChanged?.Invoke();
                     }
 
-                    if (dropInfo.TargetCollection is ObservableCollection<FavoriteShortcut> targetFavoriteShortcutsForDef)
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts)
                     {
                         foreach (string pathToObj in pathsToDroppingObjs)
                         {
-                            targetFavoriteShortcutsForDef.Add(new FavoriteShortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from favoriteShortcut in targetFavoriteShortcutsForDef select favoriteShortcut.Name).ToList()), pathToObj));
+                            targetShortcuts.Add(new Shortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in targetShortcuts select shortcut.Name).ToList()), pathToObj));
                         }
-                        
-                        AppDataChanged?.Invoke();
-                    }
-
-                    if (dropInfo.TargetCollection is ObservableCollection<NormalShortcut> targetShortcutsForDef)
-                    {
-                        foreach (string pathToObj in pathsToDroppingObjs)
-                        {
-                            targetShortcutsForDef.Add(new NormalShortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in targetShortcutsForDef select shortcut.Name).ToList()), pathToObj));
-                        }
-                        targetShortcutsForDef.ToList().OrderBy(x => x.Name);             
+                        targetShortcuts = new ObservableCollection<Shortcut>(targetShortcuts.ToList().OrderBy(x => x.Name).ToList());
                         AppDataChanged?.Invoke();
                     }
                     break;
             }
         }
-        #endregion Methods to drop shortcuts and shortcut sections
+        #endregion Methods to drop shortcuts and sections
 
         #region Method for executing shortcut by click
         public static void ExecuteShortcutByClick(Shortcut shortcut)
@@ -452,7 +386,7 @@ namespace BoomKey.ViewModels
         #region Method for executing shortcut by hotkey
         public void ExecuteShortcutByHotKey(object? sender, HotkeyEventArgs e)
         {
-            List<Shortcut>? shortcuts = GetGeneralListOfShortcuts(favoriteShortcuts.ToList(), shortcutSections.ToList());
+            List<Shortcut>? shortcuts = GetAllShortcuts(sections.ToList());
             if (shortcuts != null && shortcuts.Count > 0)
             {
                 Shortcut? existingShortcut = (from shortcut in shortcuts
@@ -475,7 +409,7 @@ namespace BoomKey.ViewModels
             {
                 if (hotKey.Combination.MultModifierKey != Addons.MultModifierKey.None)
                 {
-                    List<Shortcut>? shortcuts = GetGeneralListOfShortcuts(favoriteShortcuts.ToList(), shortcutSections.ToList());
+                    List<Shortcut>? shortcuts = GetAllShortcuts(sections.ToList());
                     if (shortcuts != null && shortcuts.Count > 0)
                     {
                         if (!HotKey.ExistsWithSameCombination(hotKey.Combination, shortcuts))
@@ -522,17 +456,14 @@ namespace BoomKey.ViewModels
         #endregion Method for moving to shortcut placement
 
         #region Methods for working with renaming window
-        public RenamingWindowVM CreateContextForShortcutRenamingWindow(Shortcut shortcut, object shortcuts)
+        public RenamingWindowVM CreateContextForShortcutRenamingWindow(Shortcut shortcut, List<Shortcut> shortcuts)
         {
-            ObservableCollection<FavoriteShortcut> favoriteShortcuts;
-            ObservableCollection<NormalShortcut> shortcutsInSection;
-
             if (shortcut == null)
             {
                 return new RenamingWindowVM();
             }
 
-            if (shortcuts is not ObservableCollection<FavoriteShortcut> && shortcuts is not ObservableCollection<NormalShortcut>)
+            if (shortcuts == null)
             {
                 return new RenamingWindowVM();
             }
@@ -543,27 +474,11 @@ namespace BoomKey.ViewModels
                 Shortcut = shortcut,
                 Name = shortcut.Name!
             };
-
-            switch (shortcuts)
+            renamingWinContext.NameChanged += (name) =>
             {
-                case ObservableCollection<FavoriteShortcut>:
-                    favoriteShortcuts = (ObservableCollection<FavoriteShortcut>)shortcuts;
-                    renamingWinContext.NameChanged += (name) => 
-                    { 
-                        shortcut.Name = NameGenerator.Start(name, (from shortcut in favoriteShortcuts select shortcut.Name).ToList());
-                        AppDataChanged?.Invoke();
-                    };
-                    break;
-
-                case ObservableCollection<NormalShortcut>:
-                    shortcutsInSection = (ObservableCollection<NormalShortcut>)shortcuts;
-                    renamingWinContext.NameChanged += (name) => 
-                    { 
-                        shortcut.Name = NameGenerator.Start(name, (from shortcut in shortcutsInSection select shortcut.Name).ToList());
-                        AppDataChanged?.Invoke();
-                    };
-                    break;
-            }
+                shortcut.Name = NameGenerator.Start(name, (from shortcut in shortcuts select shortcut.Name).ToList());
+                AppDataChanged?.Invoke();
+            };
 
             return renamingWinContext;
         }
@@ -599,11 +514,18 @@ namespace BoomKey.ViewModels
             ShortcutPropertiesWindowVM shortcutPropertiesWinContext = new()
             {
                 Title = $"{Application.Current.Resources["ShortcutPropertiesWindowTitle"]}: {shortcut.Name}",
-                Shortcut = new FavoriteShortcut(shortcut)
+                Shortcut = new Shortcut(shortcut)
             };
             shortcutPropertiesWinContext.ShortcutChanged += (updatedShortcut) => 
             {
                 shortcut.Name = updatedShortcut.Name;
+                
+                if (shortcut.PathToIcon != updatedShortcut.PathToIcon)
+                {
+                    shortcut.Icon = updatedShortcut.Icon.Clone();
+                    shortcut.PathToIcon = updatedShortcut.PathToIcon;
+                }
+
                 RegisterHotKeyToShortcut(shortcut, updatedShortcut.HotKey);
                 AppDataChanged?.Invoke();
             };
@@ -639,14 +561,16 @@ namespace BoomKey.ViewModels
                     {
                         RestoreInfoAboutShortcuts();
 
-                        if (shortcutSections != null && shortcutSections.Count > 0 && selectedShortcutSection == null)
+                        if (sections != null && sections.Count > 0 && selectedSection == null)
                         {
-                            SelectedShortcutSection = shortcutSections.First();
+                            SelectedSection = sections.First();
                         }
 
                         ShowAppComm.Execute(null);
                         AppDataChanged += () => { SaveInfoAboutShortcuts(); };
+
                         StartAppThemeInspector();
+                        StartAppUpdateInspector();
                     }
                 }, (obj) => true);
             }
@@ -707,6 +631,7 @@ namespace BoomKey.ViewModels
             {
                 return new CommandsVM((obj) =>
                 {
+                    inspectorAboutAppTheme.CancelAsync();
                     Application.Current.Shutdown();
                 }, (obj) => true);
             }
@@ -755,24 +680,8 @@ namespace BoomKey.ViewModels
         
         #region Commands for working with shortcuts
 
-        #region Command for executing shortcut by click
-        public ICommand ExecuteShortcutByClickComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is Shortcut shortcut && shortcut != null)
-                    {
-                        ExecuteShortcutByClick(shortcut);
-                    }
-                }, (obj) => true);
-            }
-        }
-        #endregion Command for exectuting shortcut by click
-
-        #region Command for executing favorite shortcut by selection in menu
-        public ICommand ExecuteFavoriteShortcutBySelectionInMenuComm
+        #region Command for executing shortcut
+        public ICommand ExecuteShortcutComm
         {
             get
             {
@@ -784,7 +693,7 @@ namespace BoomKey.ViewModels
                     }
                 }, (obj) => 
                 {
-                    if (selectedFavoriteShortcut == null)
+                    if (selectedShortcut == null)
                     {
                         return false;
                     }
@@ -793,10 +702,10 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for executing favorite shortcut by selection in menu
+        #endregion Command for exectuting shortcut
 
-        #region Command for executing shortcut in section by selection in menu
-        public ICommand ExecuteShortcutInSectionBySelectionInMenuComm
+        #region Command for cutting shortcut
+        public ICommand CutShortcutComm
         {
             get
             {
@@ -804,116 +713,15 @@ namespace BoomKey.ViewModels
                 {
                     if (parameter is Shortcut shortcut && shortcut != null)
                     {
-                        ExecuteShortcutByClick(shortcut);
-                    }
-                }, (obj) => 
-                {
-                    if (selectedShortcutInSection == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for executing shortcut in section by selection in menu
-
-        #region Command for renaming favorite shortcut
-        public ICommand RenameFavoriteShortcutComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is FavoriteShortcut favoriteShortcut && favoriteShortcut != null)
-                    {
-                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["RenamingWindowTitle"]}"))
-                        {
-                            ShowRenamingWindow(CreateContextForShortcutRenamingWindow(favoriteShortcut, favoriteShortcuts), $"{Application.Current.Resources["MainWindowTitle"]}");
-                        }
-                    }
-                }, (obj) => 
-                {
-                    if (selectedFavoriteShortcut == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for renaming favorite shortcut
-
-        #region Command for renaming shortcut in section
-        public ICommand RenameShortcutInSectionComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is NormalShortcut shortcutInSection && shortcutInSection != null)
-                    {
-                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["RenamingWindowTitle"]}"))
-                        {
-                            ShowRenamingWindow(CreateContextForShortcutRenamingWindow(shortcutInSection, selectedShortcutSection!.Shortcuts), $"{Application.Current.Resources["MainWindowTitle"]}");
-                        }
-                    }
-                }, (obj) => 
-                {
-                    if (selectedShortcutInSection == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for renaming shortcut in section
-
-        #region Command for adding shortcut in favorite
-        public ICommand AddShortcutInFavoriteComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is NormalShortcut shortcut && shortcut != null)
-                    {
-                        FavoriteShortcuts.Add(new FavoriteShortcut(shortcut) { Name = NameGenerator.Start(shortcut.Name!, (from shortcutInSection in selectedShortcutSection!.Shortcuts select shortcutInSection.Name).ToList()) });
-                        AppDataChanged?.Invoke();
-                    }
-                }, (obj) => 
-                {
-                    if (selectedShortcutInSection == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for adding shortcut in favorite
-
-        #region Command for deleting shortcut from favorite
-        public ICommand DelShortcutFromFavoriteComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is FavoriteShortcut shortcut && shortcut != null)
-                    {
+                        Clipboard.SetText(Json.GetSerializedObj(new List<Shortcut> { new Shortcut(shortcut) }));
                         HotkeyManager.Current.Remove(shortcut.HotKey.Name);
-                        FavoriteShortcuts.Remove(shortcut);
+                        SelectedSection!.Shortcuts.Remove(shortcut);
+                        SelectedSection!.Shortcuts = new ObservableCollection<Shortcut>(selectedSection!.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
                         AppDataChanged?.Invoke();
                     }
                 }, (obj) => 
                 {
-                    if (selectedFavoriteShortcut == null)
+                    if (selectedShortcut == null)
                     {
                         return false;
                     }
@@ -922,24 +730,22 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for deleting shortcut from favorite
+        #endregion Command for cutting shortcut
 
-        #region Command for deleting shortcut from section
-        public ICommand DelShortcutFromSectionComm
+        #region Command for copying shortcut
+        public ICommand CopyShortcutComm
         {
             get
             {
                 return new CommandsVM((parameter) =>
                 {
-                    if (parameter is NormalShortcut shortcut && shortcut != null)
+                    if (parameter is Shortcut shortcut && shortcut != null)
                     {
-                        HotkeyManager.Current.Remove(shortcut.HotKey.Name);
-                        SelectedShortcutSection!.Shortcuts.Remove(shortcut);
-                        AppDataChanged?.Invoke();
+                        Clipboard.SetText(Json.GetSerializedObj(new List<Shortcut> { new Shortcut(shortcut) { HotKey = new HotKey() } }));
                     }
                 }, (obj) => 
                 {
-                    if (selectedShortcutInSection == null)
+                    if (selectedShortcut == null)
                     {
                         return false;
                     }
@@ -948,158 +754,225 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for deleting shortcut from section
+        #endregion Command for copying shortcut
 
-        #region Command for moving to favorite shortcut placement
-        public ICommand MoveToFavoriteShortcutPlacementComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is FavoriteShortcut favoriteShortcut && favoriteShortcut != null)
-                    {
-                        MoveToShortcutPlacement(favoriteShortcut);
-                    }
-                }, (obj) => 
-                {
-                    if (selectedFavoriteShortcut == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for moving to favorite shortcut placement
-
-        #region Command for moving to shortcut in section placement
-        public ICommand MoveToShortcutInSectionPlacementComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is NormalShortcut shortcut && shortcut != null)
-                    {
-                        MoveToShortcutPlacement(shortcut);
-                    }
-                }, (obj) => 
-                {
-                    if (selectedShortcutInSection == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for moving to shortcut in section placement
-
-        #region Command for changing favorite shortcut properties
-        public ICommand ChangeFavoriteShortcutPropertiesComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is FavoriteShortcut favoriteShortcut && favoriteShortcut != null)
-                    {
-                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["ShortcutPropertiesWindowTitle"]}"))
-                        {
-                            ShowShortcutPropertiesWindow(CreateContextForShortcutPropertiesWindow(favoriteShortcut), $"{Application.Current.Resources["MainWindowTitle"]}");
-                        }
-                    }
-                }, (obj) =>
-                {
-                    if (selectedFavoriteShortcut == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for changing favorite shortcut properties
-
-        #region Command for changing shortcut in section properties
-        public ICommand ChangeShortcutInSectionPropertieComm
-        {
-            get
-            {
-                return new CommandsVM((parameter) =>
-                {
-                    if (parameter is NormalShortcut shortcutInSection && shortcutInSection != null)
-                    {
-                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["ShortcutPropertiesWindowTitle"]}"))
-                        {
-                            ShowShortcutPropertiesWindow(CreateContextForShortcutPropertiesWindow(shortcutInSection), $"{Application.Current.Resources["MainWindowTitle"]}");
-                        }
-                    }
-                }, (obj) =>
-                {
-                    if (selectedShortcutInSection == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-        }
-        #endregion Command for changing shortcut in section properties window
-
-        #region Command for opening favorite shortcuts in window
-        public ICommand OpenFavoriteShortcutsInWinComm
+        #region Command for pasting shortcut
+        public ICommand PasteShortcutComm
         {
             get
             {
                 return new CommandsVM((obj) =>
                 {
-                    if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["FavoriteShortcutsTitle"]}"))
+                    Shortcut newShortcut = Json.GetDeserializedObj<Shortcut>(Clipboard.GetText())!.FirstOrDefault()!;
+                    newShortcut.Name = NameGenerator.Start(newShortcut.Name!, (from shortcut in selectedSection!.Shortcuts select shortcut.Name).ToList());
+                    newShortcut.RestoreIcon();
+                    if (newShortcut.HotKey.Combination.MultModifierKey != Addons.MultModifierKey.None &&
+                        HotKey.ExistsWithSameCombination(newShortcut.HotKey.Combination, selectedSection!.Shortcuts.ToList()))
                     {
-                        FavoriteShortcutsWindowVM favoriteShortcutsWinContext = new() { MainWinContext = this };
-                        FavoriteShortcutsWindow favoriteShortcutsWin = new() { DataContext = favoriteShortcutsWinContext };
-                        favoriteShortcutsWin.Show();
-                        favoriteShortcutsWin.TogglePin();
+                        newShortcut.HotKey = new HotKey();
                     }
-                }, (obj) => true);
+                    RegisterHotKeyToShortcut(newShortcut, newShortcut.HotKey);
+                    SelectedSection!.Shortcuts.Add(newShortcut);
+                    SelectedSection!.Shortcuts = new ObservableCollection<Shortcut>(selectedSection!.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
+                    AppDataChanged?.Invoke();
+
+                }, (obj) => 
+                {
+                    List<Shortcut>? shortcuts = Json.GetDeserializedObj<Shortcut>(Clipboard.GetText());
+                    Shortcut? shortcut = null;
+                    if (shortcuts != null)
+                    {
+                        shortcut = shortcuts.FirstOrDefault();
+                    }
+
+                    if (selectedSection != null && shortcut != null)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                });
             }
         }
-        #endregion Command for showing favorite shortcuts in window
+        #endregion Command for pasting shortcut
 
-        #endregion Commands for working with shortcuts
-
-        #region Commands for working with shortcut section
-
-        #region Command for renaming shortcut section
-        public ICommand RenameShortcutSectionComm
+        #region Command for renaming shortcut
+        public ICommand RenameShortcutComm
         {
             get
             {
                 return new CommandsVM((parameter) =>
                 {
-                    if (parameter is Section shortcutSection && shortcutSection != null)
+                    if (parameter is Shortcut shortcut && shortcut != null)
+                    {
+                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["RenamingWindowTitle"]}"))
+                        {
+                            ShowRenamingWindow(CreateContextForShortcutRenamingWindow(shortcut, selectedSection!.Shortcuts.ToList()), $"{Application.Current.Resources["MainWindowTitle"]}");
+                        }
+                    }
+                }, (obj) => 
+                {
+                    if (selectedShortcut == null)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+        }
+        #endregion Command for renaming shortcut
+
+        #region Command for deleting shortcut
+        public ICommand DelShortcutComm
+        {
+            get
+            {
+                return new CommandsVM((parameter) =>
+                {
+                    if (parameter is Shortcut shortcut && shortcut != null)
+                    {
+                        HotkeyManager.Current.Remove(shortcut.HotKey.Name);
+                        SelectedSection!.Shortcuts.Remove(shortcut);
+                        AppDataChanged?.Invoke();
+                    }
+                }, (obj) => 
+                {
+                    if (selectedShortcut == null)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+        }
+        #endregion Command for deleting shortcut
+
+        #region Command for moving to shortcut placement
+        public ICommand MoveToShortcutPlacementComm
+        {
+            get
+            {
+                return new CommandsVM((parameter) =>
+                {
+                    if (parameter is Shortcut shortcut && shortcut != null)
+                    {
+                        MoveToShortcutPlacement(shortcut);
+                    }
+                }, (obj) => 
+                {
+                    if (selectedShortcut == null)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+        }
+        #endregion Command for moving to shortcut placement
+
+        #region Command for changing shortcut properties
+        public ICommand ChangeShortcutPropertiesComm
+        {
+            get
+            {
+                return new CommandsVM((parameter) =>
+                {
+                    if (parameter is Shortcut shortcut && shortcut != null)
+                    {
+                        if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["ShortcutPropertiesWindowTitle"]}"))
+                        {
+                            ShowShortcutPropertiesWindow(CreateContextForShortcutPropertiesWindow(shortcut), $"{Application.Current.Resources["MainWindowTitle"]}");
+                        }
+                    }
+                }, (obj) =>
+                {
+                    if (selectedShortcut == null)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+        }
+        #endregion Command for changing shortcut properties
+
+        #endregion Commands for working with shortcuts
+
+        #region Commands for working with sections
+
+        #region Command for adding section
+        public ICommand AddSectionComm
+        {
+            get
+            {
+                return new CommandsVM((obj) =>
+                {
+                    string sectionName = NameGenerator.Start($"{Application.Current.Resources["DefSectionNameDescription"]}", (from section in sections select section.Name).ToList());
+                    Section newSection = new(sectionName);
+                    Sections.Add(newSection);
+                    SelectedSection = newSection;
+                    AppDataChanged?.Invoke();
+                }, (obj) => true);
+            }
+        }
+        #endregion Command for adding section
+
+        #region Command for duplication section
+        public ICommand DuplicateSectionComm
+        {
+            get
+            {
+                return new CommandsVM((parameter) =>
+                {
+                    if (parameter is Section originalSection && originalSection != null)
+                    {
+                        Section newSection = new(originalSection) { Name = NameGenerator.Start(originalSection.Name!, (from section in sections select section.Name).ToList()) };
+                        Sections.Add(newSection);
+                        SelectedSection = newSection;
+                        AppDataChanged?.Invoke();
+                    }
+                }, (obj) => 
+                {
+                    if (selectedSection == null)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+        }
+        #endregion Command for duplicating section
+
+        #region Command for renaming section
+        public ICommand RenameSectionComm
+        {
+            get
+            {
+                return new CommandsVM((parameter) =>
+                {
+                    if (parameter is Section section && section != null)
                     {
                         RenamingWindowVM renamingWinContext = new()
                         {
-                            Title = $"{Application.Current.Resources["RenamingWindowTitle"]}: {shortcutSection.Name}",
-                            ShortcutSection = shortcutSection,
-                            Name = shortcutSection.Name!
+                            Title = $"{Application.Current.Resources["RenamingWindowTitle"]}: {section.Name}",
+                            ShortcutSection = section,
+                            Name = section.Name!
                         };
                         renamingWinContext.NameChanged += (name) => 
                         { 
-                            shortcutSection.Name = NameGenerator.Start(name, (from shortcutSection in shortcutSections select shortcutSection.Name).ToList());
+                            section.Name = NameGenerator.Start(name, (from shortcutSection in sections select shortcutSection.Name).ToList());
                             AppDataChanged?.Invoke();
                         };
                         ShowRenamingWindow(renamingWinContext, $"{Application.Current.Resources["MainWindowTitle"]}");
                     }
                 }, (obj) => 
                 {
-                    if (selectedShortcutSection == null)
+                    if (selectedSection == null)
                     {
                         return false;
                     }
@@ -1108,66 +981,50 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for renaming shortcut section
+        #endregion Command for renaming section
 
-        #region Command for adding shortcut section
-        public ICommand AddShortcutSectionComm
-        {
-            get
-            {
-                return new CommandsVM((obj) =>
-                {
-                    Section newSection = new(NameGenerator.Start($"{Application.Current.Resources["DefShortcutSectionNameDescription"]}", (from shortcutSection in shortcutSections select shortcutSection.Name).ToList()));
-                    ShortcutSections.Add(newSection);
-                    SelectedShortcutSection = newSection;
-                    AppDataChanged?.Invoke();
-                }, (obj) => true);
-            }
-        }
-        #endregion Command for adding shortcut section
-
-        #region Command for deleting shortcut sections
-        public ICommand DelShortcutSectionComm
+        #region Command for deleting section
+        public ICommand DelSectionComm
         {
             get
             {
                 return new CommandsVM((parameter) =>
                 {
-                    if (parameter is Section shortcutSection && shortcutSection != null)
+                    if (parameter is Section section && section != null)
                     {
-                        int indexShortcutSection = shortcutSections.ToList().FindIndex(x => x.Name == shortcutSection.Name);
-                        int countBeforeShortcutSection = GetCountBeforeShortcutSection(indexShortcutSection);
+                        int indexSection = sections.ToList().FindIndex(x => x.Name == section.Name);
+                        int countBeforeSection = GetCountBeforeSection(indexSection);
 
-                        foreach (NormalShortcut shortcut in shortcutSection.Shortcuts)
+                        foreach (Shortcut shortcut in section.Shortcuts)
                         {
                             HotkeyManager.Current.Remove(shortcut.HotKey.Name);
                         }
-                        ShortcutSections.Remove(shortcutSection);
+                        Sections.Remove(section);
 
-                        if (ShortcutSections.Count > 0)
+                        if (Sections.Count > 0)
                         {
-                            if (countBeforeShortcutSection != 0)
+                            if (countBeforeSection != 0)
                             {
-                                SelectedShortcutSection = shortcutSections[indexShortcutSection - 1];
+                                SelectedSection = sections[indexSection - 1];
                             }
                             else
                             {
-                                SelectedShortcutSection = shortcutSections[indexShortcutSection];
+                                SelectedSection = sections[indexSection];
                             }
                         }
 
                         AppDataChanged?.Invoke();
                     }
 
-                    int GetCountBeforeShortcutSection(int indexShortcutSection)
+                    int GetCountBeforeSection(int indexSection)
                     {
                         int count = 0;
 
-                        if (indexShortcutSection != 0)
+                        if (indexSection != 0)
                         {
-                            for (int i = 0; i < shortcutSections.Count; i++)
+                            for (int i = 0; i < sections.Count; i++)
                             {
-                                if (i != indexShortcutSection)
+                                if (i != indexSection)
                                 {
                                     count++;
                                 }
@@ -1182,7 +1039,7 @@ namespace BoomKey.ViewModels
                     }
                 }, (obj) => 
                 {
-                    if (selectedShortcutSection == null)
+                    if (selectedSection == null)
                     {
                         return false;
                     }
@@ -1191,26 +1048,26 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for deleting shortcut sections
+        #endregion Command for deleting section
 
-        #region Command for changing color shortcut section
-        public ICommand ChangeColorShortcutSectionComm
+        #region Command for changing color section
+        public ICommand ChangeColorSectionComm
         {
             get
             {
                 return new CommandsVM((parameter) =>
                 {
-                    if (parameter is Section shortcutSection && shortcutSection != null)
+                    if (parameter is Section section && section != null)
                     {
-                        SolidColorBrush shortcutSectionBrush = shortcutSection.Color;
+                        SolidColorBrush sectionBrush = section.Color;
                         SectionColorSelectorWindowVM sectionColorSelectorWinContext = new()
                         {
-                            Title = $"{Application.Current.Resources["ChangingColorWindowTitle"]}: {shortcutSection.Name}",
-                            OriginalColor = shortcutSectionBrush.Color
+                            Title = $"{Application.Current.Resources["ChangingColorWindowTitle"]}: {section.Name}",
+                            OriginalColor = sectionBrush.Color
                         };
                         sectionColorSelectorWinContext.ColorSelected += (color) => 
                         { 
-                            selectedShortcutSection!.Color = color;
+                            SelectedSection!.Color = color;
                             AppDataChanged?.Invoke();
                         };
                         new SectionColorSelectorWindow
@@ -1221,7 +1078,7 @@ namespace BoomKey.ViewModels
                     }
                 }, (obj) => 
                 {
-                    if (selectedShortcutSection == null)
+                    if (selectedSection == null)
                     {
                         return false;
                     }
@@ -1230,9 +1087,9 @@ namespace BoomKey.ViewModels
                 });
             }
         }
-        #endregion Command for changing color shortcut section
+        #endregion Command for changing color section
 
-        #endregion Commands for working with shortcut section
+        #endregion Commands for working with sections
 
         #endregion Commands for main working panel
 

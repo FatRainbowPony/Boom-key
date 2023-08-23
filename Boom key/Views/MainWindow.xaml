@@ -16,7 +16,7 @@
     xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
     mc:Ignorable="d"
     Title="{DynamicResource MainWindowTitle}"
-    Width="700" MinWidth="650" 
+    Width="500" MinWidth="550" 
     Height="400" MinHeight="350"
     Style="{StaticResource WinNoteHidingStyle}"
     addons:WindowBlur.IsEnabled="True"
@@ -40,8 +40,30 @@
 
     <!--#region Hotkeys -->
     <Window.InputBindings>
-        <KeyBinding Command="{Binding ShowAppComm}" Modifiers="Ctrl"  Key="OemPlus" HotkeyManager.RegisterGlobalHotkey="True"/>
-        <KeyBinding Command="{Binding HideAppComm}" Modifiers="Ctrl"  Key="OemMinus" HotkeyManager.RegisterGlobalHotkey="True"/>
+        <KeyBinding
+            Modifiers="Ctrl"
+            Key="OemPlus"
+            Command="{Binding ShowAppComm}"
+            HotkeyManager.RegisterGlobalHotkey="True"/>
+        <KeyBinding 
+            Modifiers="Ctrl"
+            Key="OemMinus"
+            Command="{Binding HideAppComm}" 
+            HotkeyManager.RegisterGlobalHotkey="True"/>
+        <KeyBinding 
+            Modifiers="Ctrl" Key="N"
+            Command="{Binding AddSectionComm}"/>
+        <KeyBinding 
+            Modifiers="Ctrl"  Key="X"
+            Command="{Binding CutShortcutComm}"
+            CommandParameter="{Binding SelectedShortcut}"/>
+        <KeyBinding 
+            Modifiers="Ctrl" Key="C"
+            Command="{Binding CopyShortcutComm}"
+            CommandParameter="{Binding SelectedShortcut}"/>
+        <KeyBinding 
+            Modifiers="Ctrl" Key="V" 
+            Command="{Binding PasteShortcutComm}"/>
     </Window.InputBindings>
     <!--#endregion Hotkeys -->
 
@@ -58,13 +80,13 @@
             CurrentApplication="{Binding CurrentApplication}"
             PathToWindowInfo="{Binding PathToWindowInfo}"/>
     </i:Interaction.Behaviors>
-     
+
     <Grid>
         
         <!--#region Tray icon -->
         <taskbar:TaskbarIcon 
             x:Name="TrayIcon" 
-            IconSource="/AppIcon.ico" 
+            IconSource="/Assets/Icons/TrayAppIcon.ico" 
             Visibility="Visible" 
             DoubleClickCommand="{Binding ShowAppComm}">
             <taskbar:TaskbarIcon.TrayToolTip>
@@ -135,87 +157,225 @@
         <!--#endregion Tray icon -->
                 
         <!--#region Main working panel -->
-        <Border
-            Background="{DynamicResource WindowBackgroundBrush}"
-            Opacity="0.85"
-            CornerRadius="0, 0, 5, 5"/>
         <Grid x:Name="MainWorkingPanel">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition MinWidth="200"/>
-                <ColumnDefinition MinWidth="200"/>
-                <ColumnDefinition MinWidth="250"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="200"/>
+                    <ColumnDefinition MinWidth="350"/>
+                </Grid.ColumnDefinitions>
 
-            <!--#region Panel with favorite shortcuts -->
-            <Grid 
-                x:Name="PanelWithFavoriteShortcuts" 
-                Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <ScrollViewer 
-                    Grid.Row="0" 
-                    Panel.ZIndex="0"
-                    Style="{DynamicResource ScrollViewerStandardStyle}"
-                    Background="Transparent"
-                    BorderBrush="Transparent"
-                    BorderThickness="0"
-                    HorizontalScrollBarVisibility="Disabled" 
-                    VerticalScrollBarVisibility="Auto"
-                    Margin="0, 0, 3, 0">
-                    <ListBox 
-                        x:Name="FavoriteShortcuts" 
-                        Style="{DynamicResource VerticalListBoxStandardStyle}"
+                <!--#region Panel with sections -->
+                <Border
+                    x:Name="PanelWithSections"
+                    Grid.Column="0"
+                    Background="{DynamicResource ContainerBackgroundBrush}"
+                    Opacity="0.90">
+                    <ScrollViewer 
+                        Style="{DynamicResource ScrollViewerStandardStyle}"
                         Background="Transparent"
                         BorderBrush="Transparent"
                         BorderThickness="0"
-                        dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
-                        dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="{Binding ShowDragDropEffectsForFavoriteShortcuts}"
-                        ItemsSource="{Binding FavoriteShortcuts}" 
-                        SelectedItem="{Binding SelectedFavoriteShortcut}">
-                        <ListBox.ContextMenu>
-                            <ContextMenu Style="{DynamicResource ContextMenuStandardStyle}">
+                        HorizontalScrollBarVisibility="Disabled" 
+                        VerticalScrollBarVisibility="Auto"
+                        Margin="3, 0, 3, 0">
+                        <ListBox 
+                            x:Name="Sections" 
+                            Style="{DynamicResource VerticalListBoxStandardStyle}" 
+                            ItemContainerStyle="{DynamicResource ListBoxItemStandardStyle}"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
+                            dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="False"
+                            ItemsSource="{Binding Sections}" 
+                            SelectedItem="{Binding SelectedSection}">
+                            <ListBox.ContextMenu>
+                                <ContextMenu Style="{DynamicResource ContextMenuStandardStyle}">
+                                    <menuitems:VectorIconMenuItem 
+                                        x:Name="AddSection" 
+                                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                        VectorIconSize="13"
+                                        Header="{DynamicResource AddSectionDescription}"
+                                        InputGestureText="Ctrl+N"
+                                        Margin="1"
+                                        Command="{Binding AddSectionComm}"/>
+                                    <menuitems:VectorIconMenuItem
+                                        x:Name="DuplicateSection"
+                                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                        VectorIconSize="13"
+                                        Header="{DynamicResource DuplicateSectionDescription}"
+                                        Margin="1"
+                                        Command="{Binding DuplicateSectionComm}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                    <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
+                                    <menuitems:VectorIconMenuItem 
+                                        x:Name="RenameSection" 
+                                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                        VectorIconSize="13"
+                                        Header="{DynamicResource RenameObjDescription}"
+                                        Margin="1"
+                                        Command="{Binding RenameSectionComm}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                    <menuitems:VectorIconMenuItem 
+                                        x:Name="DelSection" 
+                                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                        VectorIconSize="13"
+                                        Header="{DynamicResource DelObjDescription}"
+                                        Margin="1"
+                                        Command="{Binding DelSectionComm}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                    <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
+                                    <menuitems:VectorIconMenuItem
+                                        x:Name="ChangeColorSection"
+                                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                        VectorIconSize="13"
+                                        Header="{DynamicResource ColorSectionDescription}"
+                                        Margin="1"
+                                        Command="{Binding ChangeColorSectionComm}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path
+                                                x:Name="ShortcutSectionIcon" 
+                                                Grid.Column="0"
+                                                Data="{DynamicResource ShortcutSectionIcon}" 
+                                                Fill="{Binding Color}" 
+                                                Stretch="Uniform" 
+                                                Margin="8.7"/>
+                                            <TextBlock
+                                                x:Name="ShortcutSectionName" 
+                                                Grid.Column="1" 
+                                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                                HorizontalAlignment="Left" 
+                                                VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <Separator
+                                            Background="{DynamicResource ControlBorderBrush}"
+                                            HorizontalAlignment="Stretch" 
+                                            VerticalAlignment="Bottom" 
+                                            Margin="3, 4, 3, 0"/>
+                                        <Grid.ToolTip>
+                                            <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock 
+                                                        x:Name="ShortcutSectionNameToolTip"
+                                                        Grid.Row="0"
+                                                        Text="{Binding Name}" 
+                                                        TextAlignment="Left" 
+                                                        FontSize="15"
+                                                        HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Center" 
+                                                        Margin="3"/>
+                                                    <TextBlock 
+                                                        x:Name="CountShortcutInSectionToolTip" 
+                                                        Grid.Row="1"
+                                                        TextAlignment="Left"
+                                                        HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Center" 
+                                                        Margin="3, 0, 3, 3">
+                                                        <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource CountShortcutsInSectionToolTip}, Mode=OneWay}"/>
+                                                        <Run Text="{Binding Shortcuts.Count, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </ToolTip>
+                                        </Grid.ToolTip>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+                </Border>
+                <!--#endregion Panel with sections -->
+
+                <!--#region Panel with shortcuts -->
+                <Border
+                    x:Name="PanelWithShortcuts" 
+                    Grid.Column="1" 
+                    Background="{DynamicResource ContainerBackgroundBrush}"
+                    CornerRadius="0, 0, 5, 0">
+                    <Grid>
+                        <Grid.Resources>
+                            <ContextMenu
+                                x:Key="ContextMenuForShortcut"
+                                Style="{DynamicResource ContextMenuStandardStyle}">
                                 <menuitems:VectorIconMenuItem
-                                    x:Name="ExecuteFavoriteShortcut"
+                                    x:Name="ExecuteShortcut"
                                     Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
                                     VectorIconSize="13"
                                     Header="{DynamicResource ExectueObjDescription}"
                                     Margin="1"
-                                    Command="{Binding ExecuteFavoriteShortcutBySelectionInMenuComm}"
+                                    Command="{Binding ExecuteShortcutComm}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
+                                <menuitems:VectorIconMenuItem
+                                    x:Name="CutShortcut"
+                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                    VectorIconSize="13"
+                                    Header="{DynamicResource CutDescription}"
+                                    InputGestureText="Ctrl+X"
+                                    Margin="1"
+                                    Command="{Binding CutShortcutComm}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                <menuitems:VectorIconMenuItem
+                                    x:Name="CopyShortcut"
+                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                    VectorIconSize="13"
+                                    Header="{DynamicResource CopyDescription}"
+                                    InputGestureText="Ctrl+C"
+                                    Margin="1"
+                                    Command="{Binding CopyShortcutComm}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                <menuitems:VectorIconMenuItem
+                                    x:Name="PasteShortcut"
+                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                                    VectorIconSize="13"
+                                    Header="{DynamicResource PasteDescription}"
+                                    InputGestureText="Ctrl+V"
+                                    Margin="1"
+                                    Command="{Binding PasteShortcutComm}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                                <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
                                 <menuitems:VectorIconMenuItem 
-                                    x:Name="RenameFavoriteShortcut" 
+                                    x:Name="RenameShortcut" 
                                     Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
                                     VectorIconSize="13"
                                     Header="{DynamicResource RenameObjDescription}"
                                     Margin="1"
-                                    Command="{Binding RenameFavoriteShortcutComm}" 
+                                    Command="{Binding RenameShortcutComm}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
                                 <menuitems:VectorIconMenuItem 
-                                    x:Name="DelFavoriteShortcut" 
+                                    x:Name="DelShortcut" 
                                     Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
                                     VectorIconSize="13"
-                                    Header="{DynamicResource DelShortcutFromFavoriteDescription}"
+                                    Header="{DynamicResource DelObjDescription}"
                                     Margin="1"
-                                    Command="{Binding DelShortcutFromFavoriteComm}" 
+                                    Command="{Binding DelShortcutComm}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
                                 <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
                                 <menuitems:VectorIconMenuItem
-                                    x:Name="MoveToFavoriteShortcutPlacement"
+                                    x:Name="MoveToShortcutPlacement"
                                     Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
                                     VectorIconSize="13"
                                     Header="{DynamicResource MoveToPlacementObjDescription}"
                                     Margin="1"
-                                    Command="{Binding MoveToFavoriteShortcutPlacementComm}"
+                                    Command="{Binding MoveToShortcutPlacementComm}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="OpenFavoriteShortcutsInWin" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource OpenFavoriteShortcutsInWinDescription}"
-                                    Margin="1"
-                                    Command="{Binding OpenFavoriteShortcutsInWinComm}"/>
                                 <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
                                 <menuitems:VectorIconMenuItem 
                                     x:Name="ChangePropsShortcut" 
@@ -223,662 +383,501 @@
                                     VectorIconSize="13"
                                     Header="{DynamicResource PropertiesObjDescription}"
                                     Margin="1"
-                                    Command="{Binding ChangeFavoriteShortcutPropertiesComm}" 
+                                    Command="{Binding ChangeShortcutPropertiesComm}" 
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
                             </ContextMenu>
-                        </ListBox.ContextMenu>
-                        <ListBox.ItemContainerStyle>
-                            <Style BasedOn="{StaticResource ListBoxItemStandardStyle}" TargetType="ListBoxItem">
-                                <Style.Setters>
-                                    <Setter Property="controlbehaviors:ControlDoubleClickBehavior.Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ExecuteShortcutByClickComm}"/>
-                                    <Setter Property="controlbehaviors:ControlDoubleClickBehavior.CommandParameter" Value="{Binding}"/>
-                                </Style.Setters>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <ContentControl 
-                                            x:Name="LabelFavoriteShortcutIcon" 
-                                            Grid.Column="0"
-                                            ContentTemplate="{DynamicResource FavoriteShortcutsAsDataTemplateIcon}" 
-                                            Margin="6"/>
-                                        <Image 
-                                            x:Name="FavoriteShortcutIcon" 
-                                            Grid.Column="1" 
-                                            Source="{Binding Icon, UpdateSourceTrigger=PropertyChanged}"  
-                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                            Stretch="Uniform"
-                                            Height="33" 
-                                            Width="33" 
-                                            HorizontalAlignment="Stretch" 
-                                            VerticalAlignment="Stretch" 
-                                            Margin="6"/>
-                                        <TextBlock 
-                                            x:Name="FavoriteShortcutName" 
-                                            Grid.Column="2"
-                                            Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                                            HorizontalAlignment="Left" 
-                                            VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Separator
-                                        Background="{DynamicResource ControlBorderBrush}"
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Bottom" 
-                                        Margin="3, 4, 3, 0"/>
-                                    <Grid.ToolTip>
-                                        <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                        </Grid.Resources>
+                        <ScrollViewer 
+                            Style="{DynamicResource ScrollViewerStandardStyle}"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            HorizontalScrollBarVisibility="Disabled" 
+                            VerticalScrollBarVisibility="Auto"
+                            Margin="3, 0, 3, 0"
+                            Visibility="{Binding ElementName=ShowShortcutsAsList, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}">
+                            <ListBox 
+                                x:Name="ShortcutsAsList"
+                                Style="{DynamicResource VerticalListBoxStandardStyle}"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0"
+                                dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
+                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                ItemsSource="{Binding SelectedSection.Shortcuts}" 
+                                SelectedItem="{Binding SelectedShortcut}"
+						        ContextMenu="{DynamicResource ContextMenuForShortcut}">
+                                <ListBox.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource ListBoxItemStandardStyle}" TargetType="ListBoxItem">
+                                        <Style.Setters>
+                                            <Setter Property="controlbehaviors:ControlDoubleClickBehavior.Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ExecuteShortcutComm}"/>
+                                            <Setter Property="controlbehaviors:ControlDoubleClickBehavior.CommandParameter" Value="{Binding}"/>
+                                        </Style.Setters>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
                                             <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image 
+                                                    x:Name="ShortcutIcon" 
+                                                    Grid.Column="0" 
+                                                    Source="{Binding Icon, UpdateSourceTrigger=PropertyChanged}"  
+                                                    RenderOptions.BitmapScalingMode="HighQuality"
+                                                    Stretch="Uniform"
+                                                    Height="33" 
+                                                    Width="33" 
+                                                    HorizontalAlignment="Stretch" 
+                                                    VerticalAlignment="Stretch" 
+                                                    Margin="6"/>
                                                 <TextBlock 
-                                                    x:Name="FavoriteShortcutNameToolTip" 
-                                                    Grid.Row="0"
-                                                    Text="{Binding Name}" 
-                                                    TextAlignment="Left" 
-                                                    FontSize="15"
+                                                    x:Name="ShortcutName" 
+                                                    Grid.Column="1"
+                                                    Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
                                                     HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3"/>
-                                                <TextBlock 
-                                                    x:Name="FavoriteShortcutHotKeyToolTip" 
-                                                    Grid.Row="1"
-                                                    TextAlignment="Left"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3, 0, 3, 3">
-                                                    <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
-                                                    <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock 
-                                                    x:Name="DefShortcutHotKeyToolTip" 
-                                                    Grid.Row="1"
-                                                    Text="{DynamicResource DefHotKeyToolTip}"
-                                                    TextAlignment="Left"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3, 0, 3, 3">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                    VerticalAlignment="Center"/>
                                             </Grid>
-                                        </ToolTip>
-                                    </Grid.ToolTip>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
-                <Border 
-                    Grid.Row="1" 
-                    Background="{DynamicResource ControlBackgroundDarkBrush}" 
-                    BorderBrush="{DynamicResource ControlBorderBrush}" 
-                    BorderThickness="0, 1, 0, 0" 
-                    CornerRadius="0, 0, 0, 5">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=MainWin, Path=IsActive}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <ContentControl 
-                            Grid.Column="1" 
-                            Content="{DynamicResource FavoriteShortcutsAsCanvasIcon}" 
-                            Margin="6"/>
-                        <TextBlock 
-                            Grid.Column="2" 
-                            Text="{DynamicResource FavoriteShortcutsDescription}" 
-                            TextAlignment="Center" 
-                            Foreground="{DynamicResource TextForegroundBrush}"
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center" 
-                            Margin="6"/>
+                                            <Separator
+                                                Background="{DynamicResource ControlBorderBrush}"
+                                                HorizontalAlignment="Stretch" 
+                                                VerticalAlignment="Bottom" 
+                                                Margin="3, 4, 3, 0"/>
+                                            <Grid.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock 
+                                                            x:Name="ShortcutNameToolTip" 
+                                                            Grid.Row="0"
+                                                            Text="{Binding Name}" 
+                                                            TextAlignment="Left" 
+                                                            FontSize="15"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3"/>
+                                                        <TextBlock 
+                                                            x:Name="ShortcutHotKeyToolTip" 
+                                                            Grid.Row="1"
+                                                            TextAlignment="Left"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3, 0, 3, 3">
+                                                            <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
+                                                            <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock 
+                                                            x:Name="DefShortcutHotKeyToolTip" 
+                                                            Grid.Row="1"
+                                                            Text="{DynamicResource DefHotKeyToolTip}"
+                                                            TextAlignment="Left"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3, 0, 3, 3">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </ToolTip>
+                                            </Grid.ToolTip>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ScrollViewer>
+                        <ScrollViewer                               
+                            Style="{DynamicResource ScrollViewerStandardStyle}" 
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            HorizontalScrollBarVisibility="Disabled" 
+                            VerticalScrollBarVisibility="Auto"
+                            Margin="3, 0, 3, 0"
+                            Visibility="{Binding ElementName=ShowShortcutsAsBoard, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}">
+                            <ListBox 
+                                x:Name="ShorcutsAsBoard"
+                                Style="{DynamicResource ExplorerListBoxStyle}"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0"
+                                dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
+                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                ItemsSource="{Binding SelectedSection.Shortcuts}" 
+                                SelectedItem="{Binding SelectedShortcut}"
+                                ContextMenu="{DynamicResource ContextMenuForShortcut}">
+                                <ListBox.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource ListBoxItemStandardStyle}" TargetType="ListBoxItem">
+                                        <Style.Setters>
+                                            <Setter Property="controlbehaviors:ControlDoubleClickBehavior.Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ExecuteShortcutComm}"/>
+                                            <Setter Property="controlbehaviors:ControlDoubleClickBehavior.CommandParameter" Value="{Binding}"/>
+                                        </Style.Setters>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Width="70">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Image 
+                                                x:Name="ShortcutIcon" 
+                                                Grid.Row="0"
+                                                Source="{Binding Icon, UpdateSourceTrigger=PropertyChanged}"  
+                                                RenderOptions.BitmapScalingMode="HighQuality"
+                                                Stretch="Uniform"
+                                                Height="35" 
+                                                Width="35" 
+                                                HorizontalAlignment="Stretch" 
+                                                VerticalAlignment="Stretch" 
+                                                Margin="6"/>
+                                            <TextBlock 
+                                                x:Name="ShortcutName" 
+                                                Grid.Row="1"
+                                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                                TextAlignment="Center" 
+                                                TextTrimming="WordEllipsis"
+                                                MaxWidth="70" 
+                                                HorizontalAlignment="Center" 
+                                                VerticalAlignment="Center" 
+                                                Margin="6, 0, 6, 0"/>
+                                            <Grid.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock 
+                                                            x:Name="ShortcutNameToolTip" 
+                                                            Grid.Row="0"
+                                                            Text="{Binding Name}" 
+                                                            TextAlignment="Left" 
+                                                            FontSize="15"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3"/>
+                                                        <TextBlock 
+                                                            x:Name="ShortcutHotKeyToolTip"
+                                                            Grid.Row="1"
+                                                            TextAlignment="Left"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3, 0, 3, 3">
+                                                            <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
+                                                            <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock 
+                                                            x:Name="DefShortcutHotKeyToolTip"
+                                                            Grid.Row="1"
+                                                            Text="{DynamicResource DefHotKeyToolTip}"
+                                                            TextAlignment="Left"
+                                                            HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Center" 
+                                                            Margin="3, 0, 3, 3">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </ToolTip>
+                                            </Grid.ToolTip>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
-            </Grid>
-            <GridSplitter 
-                Grid.Column="0" 
-                Background="{DynamicResource ControlBorderBrush}"
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Stretch" 
-                Width="2" 
-                Margin="3, 0, 0, 0"
-                ResizeDirection="Auto"/>
-            <!--#endregion Panel with favorite shortcuts -->
+                <GridSplitter 
+                    Grid.Column="0"
+                    Background="{DynamicResource ControlBorderBrush}"
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Stretch"
+                    Width="2"
+                    ResizeDirection="Auto"/>
+                <!--#endregion Panel with shortcuts -->
 
-            <!--#region Panel with shortcuts sections -->
-            <Grid 
-                x:Name="PanelWithShortcutsSections" 
-                Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <ScrollViewer 
-                    Grid.Row="0" 
-                    Style="{DynamicResource ScrollViewerStandardStyle}"
-                    Background="Transparent"
-                    BorderBrush="Transparent"
-                    BorderThickness="0"
-                    HorizontalScrollBarVisibility="Disabled" 
-                    VerticalScrollBarVisibility="Auto">
-                    <ListBox 
-                        x:Name="ShortcutsSections" 
-                        Style="{DynamicResource VerticalListBoxStandardStyle}" 
-                        ItemContainerStyle="{DynamicResource ListBoxItemStandardStyle}"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="0"
-                        dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
-                        dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="False"
-                        ItemsSource="{Binding ShortcutSections}" 
-                        SelectedItem="{Binding SelectedShortcutSection}">
-                        <ListBox.ContextMenu>
-                            <ContextMenu Style="{DynamicResource ContextMenuStandardStyle}">
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="RenameShortcutSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource RenameObjDescription}"
-                                    Margin="1"
-                                    Command="{Binding RenameShortcutSectionComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="AddShortcutSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource AddShortcutSectionDescription}"
-                                    Margin="1"
-                                    Command="{Binding AddShortcutSectionComm}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="DelShortcutSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource DelShortcutSectionDescription}"
-                                    Margin="1"
-                                    Command="{Binding DelShortcutSectionComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
-                                <menuitems:VectorIconMenuItem
-                                    x:Name="ChangeColorShortcutSection"
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource ColorShortcutSectionDescription}"
-                                    Margin="1"
-                                    Command="{Binding ChangeColorShortcutSectionComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                            </ContextMenu>
-                        </ListBox.ContextMenu>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Path 
-                                            x:Name="ShortcutSectionIcon" 
-                                            Grid.Column="0"
-                                            Data="{DynamicResource ShortcutSectionIcon}" 
-                                            Fill="{Binding Color}" 
-                                            Stretch="Uniform" 
-                                            Margin="8.7"/>
-                                        <TextBlock 
-                                            x:Name="ShortcutSectionName" 
-                                            Grid.Column="1" 
-                                            Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                                            HorizontalAlignment="Left" 
-                                            VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Separator
-                                        Background="{DynamicResource ControlBorderBrush}"
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Bottom" 
-                                        Margin="3, 4, 3, 0"/>
-                                    <Grid.ToolTip>
-                                        <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-                                                <TextBlock 
-                                                    x:Name="ShortcutSectionNameToolTip"
-                                                    Grid.Row="0"
-                                                    Text="{Binding Name}" 
-                                                    TextAlignment="Left" 
-                                                    FontSize="15"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3"/>
-                                                <TextBlock 
-                                                    x:Name="CountShortcutInSectionToolTip" 
-                                                    Grid.Row="1"
-                                                    TextAlignment="Left"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3, 0, 3, 3">
-                                                    <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource CountShortcutsInSectionToolTip}, Mode=OneWay}"/>
-                                                    <Run Text="{Binding Shortcuts.Count, Mode=OneWay}"/>                                                 
-                                                </TextBlock>
-                                            </Grid>
-                                        </ToolTip>
-                                    </Grid.ToolTip>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
-                <Border 
-                    Grid.Row="1" 
-                    Background="{DynamicResource ControlBackgroundDarkBrush}" 
-                    BorderBrush="{DynamicResource ControlBorderBrush}" 
-                    BorderThickness="0, 1, 0, 0">
-                    <Border.Style>
-                        <Style TargetType="Border">
+                <!--#region Info panel -->
+                <Grid 
+                    x:Name="InfoPanel" 
+                    Grid.Column="1" 
+                    Width="Auto" 
+                    Height="Auto" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center">
+                    <Grid.Resources>
+                        <Style x:Key="ContentControlAboutEmptySections" TargetType="ContentControl">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=MainWin, Path=IsActive}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <ContentControl 
-                            Grid.Column="1" 
-                            Content="{DynamicResource ShortcutSectionsIcon}" 
-                            Margin="1"/>
-                        <TextBlock 
-                            Grid.Column="2" 
-                            Text="{DynamicResource ShortcutSectionsDescription}" 
-                            TextAlignment="Center" 
-                            Foreground="{DynamicResource TextForegroundBrush}"
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center" 
-                            Margin="6"/>
-                    </Grid>
-                </Border>
-            </Grid>
-            <!--#endregion Panel with shortcuts sections -->
-
-            <!--#region Panel with shortcuts in selected sections -->
-            <Grid 
-                x:Name="PanelWithShortcutsInSection" 
-                Grid.Column="2" 
-                Panel.ZIndex="0">
-                <ScrollViewer 
-                    Style="{DynamicResource ScrollViewerStandardStyle}" 
-                    Background="Transparent"
-                    BorderBrush="Transparent"
-                    BorderThickness="0"
-                    HorizontalScrollBarVisibility="Disabled" 
-                    VerticalScrollBarVisibility="Auto"
-                    Margin="3, 0, 0, 0">
-                    <ListBox 
-                        x:Name="ShortcutsInSelectedSection" 
-                        Style="{DynamicResource ExplorerListBoxStyle}"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="0"
-                        dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
-                        dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="True"
-                        ItemsSource="{Binding SelectedShortcutSection.Shortcuts}" 
-                        SelectedItem="{Binding SelectedShortcutInSection}">
-                        <ListBox.ContextMenu>
-                            <ContextMenu Style="{DynamicResource ContextMenuStandardStyle}">
-                                <menuitems:VectorIconMenuItem
-                                    x:Name="ExecuteShortcutInSection"
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource ExectueObjDescription}"
-                                    Margin="1"
-                                    Command="{Binding ExecuteShortcutInSectionBySelectionInMenuComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="RenameShortcutInSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource RenameObjDescription}"
-                                    Margin="1"
-                                    Command="{Binding RenameShortcutInSectionComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="AddShortcutInFavorite" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource AddShortcutInFavoriteDescription}"
-                                    Margin="1"
-                                    Command="{Binding AddShortcutInFavoriteComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="DelShortcutFromSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource DelShortcutFromSectionDescription}"
-                                    Margin="1"
-                                    Command="{Binding DelShortcutFromSectionComm}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                                <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
-                                <menuitems:VectorIconMenuItem 
-                                    x:Name="ChangePropsShortcutFromSection" 
-                                    Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
-                                    VectorIconSize="13"
-                                    Header="{DynamicResource PropertiesObjDescription}"
-                                    Margin="1"
-                                    Command="{Binding ChangeShortcutInSectionPropertieComm}" 
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
-                            </ContextMenu>
-                        </ListBox.ContextMenu>
-                        <ListBox.ItemContainerStyle>
-                            <Style BasedOn="{StaticResource ListBoxItemStandardStyle}" TargetType="ListBoxItem">
-                                <Style.Setters>
-                                    <Setter Property="controlbehaviors:ControlDoubleClickBehavior.Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ExecuteShortcutByClickComm}"/>
-                                    <Setter Property="controlbehaviors:ControlDoubleClickBehavior.CommandParameter" Value="{Binding}"/>
-                                </Style.Setters>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Width="70">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Image 
-                                        x:Name="ShortcutInSectionIcon" 
-                                        Grid.Row="0"
-                                        Source="{Binding Icon, UpdateSourceTrigger=PropertyChanged}"  
-                                        RenderOptions.BitmapScalingMode="HighQuality"
-                                        Stretch="Uniform"
-                                        Height="35" 
-                                        Width="35" 
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Stretch" 
-                                        Margin="6"/>
-                                    <TextBlock 
-                                        x:Name="ShortcutInSectionName" 
-                                        Grid.Row="1"
-                                        Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                                        TextAlignment="Center" 
-                                        TextTrimming="WordEllipsis"
-                                        MaxWidth="70" 
-                                        HorizontalAlignment="Center" 
-                                        VerticalAlignment="Center" 
-                                        Margin="6, 0, 6, 0"/>
-                                    <Grid.ToolTip>
-                                        <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-                                                <TextBlock 
-                                                    x:Name="ShortcutNameToolTip" 
-                                                    Grid.Row="0"
-                                                    Text="{Binding Name}" 
-                                                    TextAlignment="Left" 
-                                                    FontSize="15"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3"/>
-                                                <TextBlock 
-                                                    x:Name="ShortcutHotKeyToolTip"
-                                                    Grid.Row="1"
-                                                    TextAlignment="Left"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3, 0, 3, 3">
-                                                    <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
-                                                    <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock 
-                                                    x:Name="DefShortcutHotKeyToolTip"
-                                                    Grid.Row="1"
-                                                    Text="{DynamicResource DefHotKeyToolTip}"
-                                                    TextAlignment="Left"
-                                                    HorizontalAlignment="Left" 
-                                                    VerticalAlignment="Center" 
-                                                    Margin="3, 0, 3, 3">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </Grid>
-                                        </ToolTip>
-                                    </Grid.ToolTip>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
-            </Grid>
-            <GridSplitter 
-                Grid.Column="2"
-                Background="{DynamicResource ControlBorderBrush}"
-                HorizontalAlignment="Left" 
-                VerticalAlignment="Stretch"
-                Width="2"
-                ResizeDirection="Auto"/>
-            <!--#endregion Panel with shortcuts in selected sections -->
-
-            <!--#region Info panel -->
-            <Grid 
-                x:Name="InfoPanel" 
-                Grid.Column="2" 
-                Panel.ZIndex="1"
-                Width="Auto" 
-                Height="Auto" 
-                HorizontalAlignment="Center" 
-                VerticalAlignment="Center">
-                <Grid.Resources>
-                    <Style x:Key="ContentControlAboutEmptySectionAndShortcutsSections" TargetType="ContentControl">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                    <Condition Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                    <Style x:Key="TextBlockAboutEmptySectionStyle" TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                    <Condition Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                    <Condition Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                    <Style x:Key="TextBlockAboutEmptyShortcutsInSection" TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                    <Condition Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
+                                <DataTrigger Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
                                     <Setter Property="Visibility" Value="Visible"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ShortcutSections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                    <Condition Binding="{Binding ElementName=ShortcutsSections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                        <Condition Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style x:Key="TextBlockAboutEmptySectionsStyle" TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                        <Condition Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                        <Condition Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style x:Key="TextBlockAboutEmptyShortcutsInSection" TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Resources>
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=MainWin, Path=IsActive}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                        <Condition Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Sections.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                        <Condition Binding="{Binding ElementName=Sections, Path=SelectedItem.Shortcuts.Count, Mode=OneWay, Converter={StaticResource ListCountToBoollean}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                <!--#region Info icons -->
-                <ContentControl 
-                    x:Name="InfoIcon" 
-                    Grid.Row="0" 
-                    Style="{DynamicResource ContentControlAboutEmptySectionAndShortcutsSections}"
-                    ContentTemplate="{DynamicResource InfoIcon}"/>
-                <!--#endregion Info icons -->
+                    <!--#region Info icons -->
+                    <ContentControl 
+                        x:Name="InfoIcon" 
+                        Grid.Row="0" 
+                        Style="{DynamicResource ContentControlAboutEmptySections}"
+                        ContentTemplate="{DynamicResource InfoIcon}"/>
+                    <!--#endregion Info icons -->
 
-                <!--#region Warnings -->
-                <TextBlock 
-                    x:Name="WarningAboutEmptySection" 
-                    Grid.Row="1" 
-                    Style="{StaticResource TextBlockAboutEmptySectionStyle}"
-                    Text="{DynamicResource WarningAboutEmptySectionDescription}" 
-                    TextAlignment="Center" 
-                    Foreground="{DynamicResource TextForegroundBrush}" 
-                    FontSize="20"
-                    HorizontalAlignment="Center" 
-                    VerticalAlignment="Center" 
-                    Margin="0, 35, 0, 0"/>
-                <TextBlock 
-                    x:Name="WarningAboutEmptyShortcutsInSection" 
-                    Grid.Row="1" 
-                    Style="{StaticResource TextBlockAboutEmptyShortcutsInSection}"
-                    Text="{DynamicResource WarningAboutEmptyShortcutsInSectionDescription}" 
-                    TextAlignment="Center" 
-                    Foreground="{DynamicResource TextForegroundBrush}" 
-                    FontSize="20"
-                    HorizontalAlignment="Center" 
-                    VerticalAlignment="Center" 
-                    Margin="0, 35, 0, 0"/>
-                <!--#endregion Warnings -->
+                    <!--#region Warnings -->
+                    <TextBlock 
+                        x:Name="WarningAboutEmptySection" 
+                        Grid.Row="1" 
+                        Style="{StaticResource TextBlockAboutEmptySectionsStyle}"
+                        Text="{DynamicResource WarningAboutEmptySectionDescription}" 
+                        TextAlignment="Center" 
+                        Foreground="{DynamicResource TextForegroundBrush}" 
+                        FontSize="20"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Margin="0, 35, 0, 0"/>
+                    <TextBlock 
+                        x:Name="WarningAboutEmptyShortcutsInSection" 
+                        Grid.Row="1" 
+                        Style="{StaticResource TextBlockAboutEmptyShortcutsInSection}"
+                        Text="{DynamicResource WarningAboutEmptyShortcutsInSectionDescription}" 
+                        TextAlignment="Center" 
+                        Foreground="{DynamicResource TextForegroundBrush}" 
+                        FontSize="20"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Margin="0, 35, 0, 0"/>
+                    <!--#endregion Warnings -->
 
-                <!--#region Recomendations -->
-                <TextBlock 
-                    x:Name="RecomendationAboutAddingSections" 
-                    Grid.Row="2" 
-                    Style="{StaticResource TextBlockAboutEmptySectionStyle}"
-                    Text="{DynamicResource RecomendationAboutAddingSectionsDescription}" 
-                    TextAlignment="Center" 
-                    Foreground="{DynamicResource TextForegroundBrush}" 
-                    FontSize="15"/>
-                <TextBlock 
-                    x:Name="RecomendationAboutAddingShortcutsInSections" 
-                    Grid.Row="2" 
-                    Style="{StaticResource TextBlockAboutEmptyShortcutsInSection}"
-                    Text="{DynamicResource RecomendationAboutAddingShortcutsInSectionsDescription}" 
-                    TextAlignment="Center" 
-                    Foreground="{DynamicResource TextForegroundBrush}" 
-                    FontSize="15"/>
-                <!--#endregion Recomendations -->
+                    <!--#region Recomendations -->
+                    <TextBlock 
+                        x:Name="RecomendationAboutAddingSections" 
+                        Grid.Row="2" 
+                        Style="{StaticResource TextBlockAboutEmptySectionsStyle}"
+                        Text="{DynamicResource RecomendationAboutAddingSectionsDescription}" 
+                        TextAlignment="Center" 
+                        Foreground="{DynamicResource TextForegroundBrush}" 
+                        FontSize="15"/>
+                    <TextBlock 
+                        x:Name="RecomendationAboutAddingShortcutsInSections" 
+                        Grid.Row="2" 
+                        Style="{StaticResource TextBlockAboutEmptyShortcutsInSection}"
+                        Text="{DynamicResource RecomendationAboutAddingShortcutsInSectionsDescription}" 
+                        TextAlignment="Center" 
+                        Foreground="{DynamicResource TextForegroundBrush}" 
+                        FontSize="15"/>
+                    <!--#endregion Recomendations -->
 
+                </Grid>
+                <!--#endregion Info panel -->
+                
             </Grid>
-            <!--#endregion Info panel -->
 
+            <!--#region Panel for selection view shortcuts -->
+            <Border
+                x:Name="PanelForSelectionViewShortcuts"
+                Grid.Row="1"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0"
+                CornerRadius="0, 0, 5, 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock 
+                        x:Name="CountShortcutInSection" 
+                        Grid.Column="0"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        TextAlignment="Left"
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Center" 
+                        Margin="6, 3, 3, 3">
+                        <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource CountShortcutsInSectionDescription}, Mode=OneWay}"/>
+                        <Run Text="{Binding SelectedSection.Shortcuts.Count, Mode=OneWay}"/>
+                        <TextBlock.ToolTip>
+                            <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                <TextBlock Text="{DynamicResource CountShortcutsInSectionExtraToolTip}"/>
+                            </ToolTip>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                    <ListBox
+                        x:Name="TypesOfShortcutsView"
+                        Grid.Column="1"
+                        Style="{DynamicResource HorizontalListBoxStandardStyle}"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
+                        ItemContainerStyle="{DynamicResource ListBoxItemStandardStyle}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Stretch">
+                        <ListBoxItem
+                            x:Name="ShowShortcutsAsList"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            Width="25"
+                            Height="23"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            IsSelected="True">
+                            <Path 
+                                Data="{DynamicResource ShowingAsListIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="Uniform"
+                                Margin="1"/>
+                            <ListBoxItem.ToolTip>
+                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                    <TextBlock Text="{DynamicResource ShowShortuctsAsListDescription}"/>
+                                </ToolTip>
+                            </ListBoxItem.ToolTip>
+                        </ListBoxItem>
+                        <ListBoxItem
+                            x:Name="ShowShortcutsAsBoard"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            Width="25"
+                            Height="23"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                            <Path
+                                Data="{DynamicResource ShowingAsBoardIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="Uniform"
+                                Margin="2"/>
+                            <ListBoxItem.ToolTip>
+                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                    <TextBlock Text="{DynamicResource ShowShortcutsAsBoardDescription}"/>
+                                </ToolTip>
+                            </ListBoxItem.ToolTip>
+                        </ListBoxItem>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <!--#endregion Panel for selection view shortcuts -->
+            
         </Grid>
         <!--#endregion Main working panel -->
 

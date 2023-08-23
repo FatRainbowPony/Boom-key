@@ -5,16 +5,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:addons="clr-namespace:AppDevTools.Addons"
     xmlns:vm="clr-namespace:AppDevTools.Windows.LoadingWindow.ViewModels"
     mc:Ignorable="d"
     Title="{Binding WindowName}" 
-    Height="160" 
+    Height="150" 
     Width="500"
     WindowStyle="None"
     AllowsTransparency="True"
     Background="Transparent"
-    addons:WindowBlur.IsEnabled="True"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen">
@@ -24,18 +22,18 @@
     </Window.DataContext>
 
     <Grid>
-        <Border
+        <Border 
             Background="{DynamicResource ContainerBackgroundBrush}"
             BorderBrush="{DynamicResource ContainerBorderBrush}"
             BorderThickness="1"
-            Opacity="0.85"
-            CornerRadius="10"/>
-        <Border CornerRadius="10">
+            CornerRadius="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
+
+                <!--#region Panel with info about loading -->
                 <Grid 
                     x:Name="PanelWithInfoAboutLoading"
                     Grid.Column="0">
@@ -92,6 +90,31 @@
                         FontSize="20" 
                         Margin="6, 6, 6, 0"/>
                 </Grid>
+                <!--#endregion Panel with info about loading -->
+
+                <!--#region Loading percentage -->
+                <TextBlock 
+                    x:Name="LoadingPercentage" 
+                    Grid.Column="1" 
+                    Text="{Binding LoadingPercentage, StringFormat={}{0}%}" 
+                    TextAlignment="Center" 
+                    Foreground="{DynamicResource TextForegroundBrush}" 
+                    FontSize="20"
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding LoadingPercentage}" Value="0">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <!--#endregion Loading percentage -->
+                
+                <!--#region Loading animation ellipses -->
                 <Ellipse 
                     x:Name="Ellipse" 
                     Grid.Column="1" 
@@ -148,6 +171,8 @@
                     Height="20" 
                     Width="20" 
                     Margin="86, 24, 24, 86"/>
+                <!--#endregion Loading animation ellipses -->
+
             </Grid>
         </Border>
     </Grid>

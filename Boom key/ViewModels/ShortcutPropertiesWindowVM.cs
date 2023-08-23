@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using AppDevTools.Templates.MVVM.ViewModel.Base;
 using AppDevTools.Templates.MVVM.ViewModel.Commands;
 using BoomKey.Models;
@@ -104,6 +106,32 @@ namespace BoomKey.ViewModels
         }
         #endregion Command for startup window
 
+        #region Command to select shortcut icon
+        public ICommand SelectShortcutIconComm
+        {
+            get
+            {
+                return new CommandsVM((obj) =>
+                {
+                    string? pathToShortcutIcon = appDevToolsExts.File.UseOpenDialogSingleSel($"{Application.Current.Resources["SelectShortcutIconDescription"]}", $"{Application.Current.Resources["FilterForShortcutIconDescription"]}");
+                    if (pathToShortcutIcon != null && File.Exists(pathToShortcutIcon))
+                    {
+                        ImageSource? shortcutIcon = appDevToolsExts.File.GetIcon(pathToShortcutIcon);
+                        if (shortcutIcon != null)
+                        {
+                            Shortcut!.Icon = shortcutIcon;
+                            Shortcut!.PathToIcon = pathToShortcutIcon;
+                        }
+                        else
+                        {
+                            Shortcut.ShowErrorAboutFailedGettingIcon();
+                        }
+                    }
+                }, (obj) => true);
+            }
+        }
+        #endregion Command to select shortcut icon
+
         #region Command to unconfirm changes shortcut properties
         public ICommand UnconfirmChangesShortcutPropertiesComm
         {
@@ -128,6 +156,7 @@ namespace BoomKey.ViewModels
                     {
                         Shortcut!.Name = shortcut.Name.Trim();
                     }
+
                     Shortcut!.HotKey = new HotKey(shortcut.HotKey.Name, new Combination(appDevToolsExts.Enum.GetEnumFromStr<Addons.Key>(selectedKey!), appDevToolsExts.Enum.GetEnumFromStr<Addons.MultModifierKey>(selectedMultModifierKey!)));
                     ShortcutChanged?.Invoke(shortcut);
 

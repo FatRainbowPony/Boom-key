@@ -15,6 +15,7 @@ namespace BoomKey.Models
         #region Private
         private string? name;
         private SolidColorBrush color;
+        private ObservableCollection<Shortcut> shortcuts;
         #endregion Private
 
         #endregion Fields
@@ -34,7 +35,11 @@ namespace BoomKey.Models
             set => Set(ref color, value);
         }
 
-        public ObservableCollection<NormalShortcut> Shortcuts { get; set; }
+        public ObservableCollection<Shortcut> Shortcuts
+        {
+            get => shortcuts;
+            set => Set(ref shortcuts, value);
+        }
         #endregion Public
 
         #endregion Properties
@@ -45,14 +50,22 @@ namespace BoomKey.Models
         public Section()
         {
             Color = GenerateColor();
-            Shortcuts = new ObservableCollection<NormalShortcut>();
+            Shortcuts = new ObservableCollection<Shortcut>();
+        }
+
+        public Section(Section section)
+        {
+            section ??= new Section();
+            SolidColorBrush sectionBrush = section.Color;
+            Color = new SolidColorBrush(sectionBrush.Color);
+            Shortcuts = new ObservableCollection<Shortcut>(section.Shortcuts);
         }
 
         public Section(string name)
         {
             Name = name;
             Color = GenerateColor();
-            Shortcuts = new ObservableCollection<NormalShortcut>();
+            Shortcuts = new ObservableCollection<Shortcut>();
         }
         #endregion Public
 

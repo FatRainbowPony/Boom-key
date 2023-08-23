@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
@@ -154,6 +155,21 @@ namespace AppDevTools.Extensions
             return null;
         }
         #endregion Method to use save file dialog
+
+        #region Method to copy files recursively
+        public static void CopyFilesRecursively(string sourcePath, string destinationPath)
+        {
+            foreach (string dirPath in sysIO.Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                sysIO.Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+            }
+
+            foreach (string newPath in sysIO.Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                sysIO.File.Copy(newPath, newPath.Replace(sourcePath, destinationPath), true);
+            }
+        }
+        #endregion Method to copy files recursively
 
         #region Method to load file
         /// <summary>

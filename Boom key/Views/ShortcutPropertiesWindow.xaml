@@ -35,8 +35,8 @@
     
     <!--#region Hotkeys -->
     <Window.InputBindings>
-        <KeyBinding Command="{Binding UnconfirmChangesShortcutPropertiesComm}" Key="Esc"/>
-        <KeyBinding Command="{Binding ConfirmChangesShortcutPropertiesComm}" Key="Enter"/>
+        <KeyBinding Key="Esc" Command="{Binding UnconfirmChangesShortcutPropertiesComm}"/>
+        <KeyBinding Key="Enter" Command="{Binding ConfirmChangesShortcutPropertiesComm}"/>
     </Window.InputBindings>
     <!--#endregion Hotkeys -->
 
@@ -80,24 +80,42 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Border 
-                    x:Name="Border"
-                    Grid.Column="0" 
-                    BorderBrush="{DynamicResource ControlBorderBrush}" 
-                    BorderThickness="1"
-                    Width="40"
-                    Margin="10" 
-                    CornerRadius="5">
-                    <Image 
-                        x:Name="ShortcutIcon" 
-                        Grid.Column="0"
-                        Source="{Binding Shortcut.Icon, UpdateSourceTrigger=PropertyChanged}"
-                        RenderOptions.BitmapScalingMode="HighQuality"
-                        Stretch="Uniform"
-                        HorizontalAlignment="Stretch" 
-                        VerticalAlignment="Stretch" 
-                        Margin="6"/>
-                </Border>
+                <Button 
+                    x:Name="SelectShortcutIcon"
+                    Command="{Binding SelectShortcutIconComm}">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border 
+                                x:Name="Border"
+                                Grid.Column="0" 
+                                BorderBrush="{DynamicResource ControlBorderBrush}" 
+                                BorderThickness="1"
+                                Width="40"
+                                Margin="10" 
+                                CornerRadius="5">
+                                <Image 
+                                    x:Name="ShortcutIcon" 
+                                    Grid.Column="0"
+                                    Source="{Binding Shortcut.Icon, UpdateSourceTrigger=PropertyChanged}"
+                                    RenderOptions.BitmapScalingMode="HighQuality"
+                                    Stretch="Uniform"
+                                    HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Stretch" 
+                                    Margin="6"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border"  Property="BorderBrush" Value="{DynamicResource TextForegroundBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button.ToolTip>
+                        <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                            <TextBlock Text="{DynamicResource ChangeShortcutIconToolTip}"/>
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
                 <TextBox 
                     x:Name="ShortcutName" 
                     Grid.Column="1" 

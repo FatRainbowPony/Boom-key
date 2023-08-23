@@ -6,10 +6,14 @@
     <RootNamespace>BoomKey</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <AssemblyName>Boom key</AssemblyName>
-    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Icons\TrayAppIcon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AssemblyInfo.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\Icons\QuestionIcon.ico" />
@@ -17,13 +21,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\App dev tools\App dev tools.csproj" />
+    <ProjectReference Include="..\App update installer\App update installer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="AppIcon.ico">
+    <EmbeddedResource Include="Assets\Icons\DefAppIcon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AssemblyInfo.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <Resource Include="Assets\Icons\QuestionIcon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Assets\Icons\QuestionIcon.ico">
+    <Resource Include="Assets\Icons\TrayAppIcon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -610,7 +610,7 @@
         <Setter Property="VectorIconMargin" Value="5"/>
         <Setter Property="IsChecked" Value="False"/>
         <Setter Property="TextVisibility" Value="Visible"/>
-        <Setter Property="Text" Value="ToggleButton"/>
+        <Setter Property="Text" Value="CheckBox"/>
         <Setter Property="TextMargin" Value="3, 0, 0, 0"/>
         <Setter Property="RoundingCorners" Value="5"/>
         <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
