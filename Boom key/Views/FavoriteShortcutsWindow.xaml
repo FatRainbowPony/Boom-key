@@ -1,0 +1,197 @@
+﻿<pwindow:PersonalizedWindow 
+    x:Name="FavoriteShortcutsWin"
+    x:Class="BoomKey.Views.FavoriteShortcutsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controlbehaviors="clr-namespace:AppDevTools.Behaviors.Control;assembly=AppDevTools"
+    xmlns:winbehaviors="clr-namespace:AppDevTools.Behaviors.Window;assembly=AppDevTools"
+    xmlns:menuitems="clr-namespace:AppDevTools.Controls.MenuItems;assembly=AppDevTools"
+    xmlns:addons="clr-namespace:AppDevTools.Addons;assembly=AppDevTools"
+    xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow;assembly=AppDevTools"
+    xmlns:vm="clr-namespace:BoomKey.ViewModels"
+    xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+    mc:Ignorable="d"
+    Title="{DynamicResource FavoriteShortcutsTitle}" 
+    Height="500" MinHeight="150"
+    Width="80" MinWidth="80" MaxWidth="80"
+    Style="{StaticResource WinNoteStandardStyle}"
+    addons:WindowBlur.IsEnabled="True"
+    Background="Transparent"
+    BorderBrush="{DynamicResource WindowBorderBrush}"
+    BorderThickness="1"
+    WindowRoundingCorners="5"
+    TitleBarVisibility="Visible"
+    TitleBarBackground="{DynamicResource TitleBarBackgroundBrush}"
+    TitleBarRoundingCorners="5, 5, 0, 0"
+    CaptionForeground="{DynamicResource TextForegroundBrush}"
+    ManagingButtonVisibility="Visible"
+    ManagingButtonHeight="25"
+    ManagingButtonWidth="25"
+    ManagingButtonRoundingCorners="12.5"
+    WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:FavoriteShortcutsWindowVM/>
+    </Window.DataContext>
+
+    <i:Interaction.Behaviors>
+        <winbehaviors:WindowSavingSizesBehavior
+            CurrentApplication="{Binding CurrentApplication}"
+            PathToWindowInfo="{Binding PathToWindowInfo}"/>
+    </i:Interaction.Behaviors>
+    
+    <!--#region Main working panel -->
+    <Grid x:Name="MainWorkingPanel">
+        <Border
+            Background="{DynamicResource WindowBackgroundBrush}"
+            Opacity="0.85"
+            CornerRadius="0, 0, 5, 5"/>
+        <ListBox 
+            x:Name="Shortcuts"
+            Grid.Row="0"
+            Style="{DynamicResource VerticalListBoxWithOnlyUpDownScrollButtonsStyle}"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            BorderThickness="0"
+            dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
+            dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="{Binding MainWinContext.ShowDragDropEffectsForFavoriteShortcuts}"
+            ItemsSource="{Binding MainWinContext.FavoriteShortcuts}"
+            SelectedItem="{Binding SelectedShortcut}">
+            <ListBox.ContextMenu>
+                <ContextMenu Style="{DynamicResource ContextMenuStandardStyle}">
+                    <menuitems:VectorIconMenuItem
+                        x:Name="ExecuteShortcut"
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        VectorIconSize="13"
+                        Header="{DynamicResource ExectueObjDescription}"
+                        Margin="1"
+                        Command="{Binding ExecuteShortcutBySelectionInMenuComm}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                    <menuitems:VectorIconMenuItem 
+                        x:Name="RenameShortcut" 
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        VectorIconSize="13"
+                        Header="{DynamicResource RenameObjDescription}"
+                        Margin="1"
+                        Command="{Binding RenameShortcutComm}" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                    <menuitems:VectorIconMenuItem 
+                        x:Name="DelShortcut" 
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        VectorIconSize="13"
+                        Header="{DynamicResource DelShortcutFromFavoriteDescription}"
+                        Margin="1"
+                        Command="{Binding DelShortcutComm}" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                    <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
+                    <menuitems:VectorIconMenuItem
+                        x:Name="MoveToShortcutPlacement"
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        VectorIconSize="13"
+                        Header="{DynamicResource MoveToPlacementObjDescription}"
+                        Margin="1"
+                        Command="{Binding MoveToShortcutPlacementComm}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                    <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
+                    <menuitems:VectorIconMenuItem 
+                        x:Name="ChangePropsShortcut" 
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        VectorIconSize="13"
+                        Header="{DynamicResource PropertiesObjDescription}"
+                        Margin="1"
+                        Command="{Binding ChangeShortcutPropertiesComm}" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemContainerStyle>
+                <Style BasedOn="{StaticResource ListBoxItemAnimScaleStyle}" TargetType="ListBoxItem">
+                    <Style.Setters>
+                        <Setter Property="controlbehaviors:ControlDoubleClickBehavior.Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ExecuteShortcutByClickComm}"/>
+                        <Setter Property="controlbehaviors:ControlDoubleClickBehavior.CommandParameter" Value="{Binding}"/>
+                    </Style.Setters>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Image 
+                            x:Name="ShortcutIcon"
+                            Source="{Binding Icon, UpdateSourceTrigger=PropertyChanged}" 
+                            RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Unspecified"
+                            Stretch="UniformToFill" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" 
+                            Margin="15"/>
+                        <Grid.ToolTip>
+                            <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock 
+                                        x:Name="ShortcutNameToolTip" 
+                                        Grid.Row="0"
+                                        Text="{Binding Name}" 
+                                        TextAlignment="Left" 
+                                        FontSize="15"
+                                        HorizontalAlignment="Left" 
+                                        VerticalAlignment="Center" 
+                                        Margin="3"/>
+                                    <TextBlock 
+                                        x:Name="ShortcutHotKeyToolTip" 
+                                        Grid.Row="1"
+                                        TextAlignment="Left"
+                                        HorizontalAlignment="Left" 
+                                        VerticalAlignment="Center" 
+                                        Margin="3, 0, 3, 3">
+                                        <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
+                                        <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock 
+                                        x:Name="DefShortcutHotKeyToolTip" 
+                                        Grid.Row="1"
+                                        Text="{DynamicResource DefHotKeyToolTip}"
+                                        TextAlignment="Left"
+                                        HorizontalAlignment="Left" 
+                                        VerticalAlignment="Center" 
+                                        Margin="3, 0, 3, 3">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToBollean}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </ToolTip>
+                        </Grid.ToolTip>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+    <!--#endregion Main working panel -->
+    
+</pwindow:PersonalizedWindow>

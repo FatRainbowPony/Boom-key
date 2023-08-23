@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:BoomKey.Converters">
+    <local:InputToStringConverter x:Key="InputToString"/>
+    <local:InputToBoolleanConverter x:Key="InputToBollean"/>
+    <local:ListCountToBoolleanConverter x:Key="ListCountToBoollean"/>
+</ResourceDictionary>

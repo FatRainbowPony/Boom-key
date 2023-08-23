@@ -1,0 +1,98 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--#region Description -->
+
+    <!--#region Description for context menu of text box -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CutDescription">
+        Вырезать
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CopyDescription">
+        Копировать
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PasteDescription">
+        Вставить
+    </system:String>
+    <!--#endregion Description for context menu of text box -->
+
+    <!--#region Description for context menu of scroll bar -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollHereDescription">
+        Прокрутка на месте
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToTopDescription">
+        Вверх
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToBottomDescription">
+        Вниз
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageUpDescription">
+        Страница вверх
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageDownDescription">
+        Страница вниз
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineUpDescription">
+        Прокрутка вверх
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineDownDescription">
+        Прокрутка вниз
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToLeftEndDescription">
+        К левому краю
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToRightEndDescription">
+        К правому краю
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageLeftDescription">
+        Страница влево
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageRightDescription">
+        Страница вправо
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineLeftDescription">
+        Прокрутка влево
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineRightDescription">
+        Прокрутка вправо
+    </system:String>
+    <!--#endregion Description for context menu of scroll bar -->
+
+    <!--#endregion Description -->
+
+    <!--#region ToolTips -->
+
+    <!--#region ToolTips for title bar buttons of window  -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MinToTaskbarButtonWinToolTip">
+        Свернуть
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MinToNormalButtonWinToolTip">
+        Свернуть в окно
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MaxButtonWinToolTip">
+        Развернуть
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CloseButtonWinToolTip">
+        Закрыть
+    </system:String>
+    <!--#endregion ToolTips for title bar buttons of window -->
+
+    <!--#endregion ToolTips -->
+    
+</ResourceDictionary>

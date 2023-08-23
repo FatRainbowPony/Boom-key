@@ -1,0 +1,98 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--#region Description -->
+
+    <!--#region Description for context menu of text box -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CutDescription">
+        Cut
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CopyDescription">
+        Copy
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PasteDescription">
+        Paste
+    </system:String>
+    <!--#endregion Description for context menu of text box -->
+
+    <!--#region Description for context menu of scroll bar -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollHereDescription">
+        Scroll here
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToTopDescription">
+        Scroll to top
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToBottomDescription">
+        Scroll to bottom
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageUpDescription">
+        Page up
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageDownDescription">
+        Page down
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineUpDescription">
+        Line up
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineDownDescription">
+        Line down
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToLeftEndDescription">
+        Scroll to left end
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ScrollToRightEndDescription">
+        Scroll to right end
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageLeftDescription">
+        Page left
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PageRightDescription">
+        Page right
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineLeftDescription">
+        Line left
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LineRightDescription">
+        Line right
+    </system:String>
+    <!--#endregion Description for context menu of scroll bar -->
+
+    <!--#endregion Description -->
+
+    <!--#region ToolTips -->
+
+    <!--#region ToolTips for title bar buttons of window  -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MinToTaskbarButtonWinToolTip">
+        Minimize
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MinToNormalButtonWinToolTip">
+        Collapse to window
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="MaxButtonWinToolTip">
+        Maximize
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CloseButtonWinToolTip">
+        Close
+    </system:String>
+    <!--#endregion ToolTips for title bar buttons of window -->
+
+    <!--#endregion ToolTips -->
+    
+</ResourceDictionary>

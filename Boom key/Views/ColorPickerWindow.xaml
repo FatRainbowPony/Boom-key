@@ -1,0 +1,129 @@
+﻿<pwindow:PersonalizedWindow 
+    x:Name="ColorPickerWin"
+    x:Class="BoomKey.Views.ColorPickerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:buttons="clr-namespace:AppDevTools.Controls.Buttons;assembly=AppDevTools"
+    xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow;assembly=AppDevTools"
+    xmlns:vm="clr-namespace:BoomKey.ViewModels"
+    xmlns:pColorPicker="clr-namespace:ColorPicker;assembly=ColorPicker"
+    mc:Ignorable="d"
+    Title="{DynamicResource ColorPickerWindowTitle}" 
+    Height="500" Width="350"
+    Style="{DynamicResource WinDialogNoResizeStyle}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource WindowBorderBrush}"
+    BorderThickness="1"
+    WindowRoundingCorners="5"
+    TitleBarVisibility="Visible"
+    TitleBarBackground="{DynamicResource TitleBarBackgroundBrush}"
+    TitleBarRoundingCorners="5, 5, 0, 0"
+    CaptionVisibility="Visible"
+    CaptionForeground="{DynamicResource TextForegroundBrush}"
+    ManagingButtonVisibility="Hidden"
+    ManagingButtonHeight="25"
+    ManagingButtonWidth="25"
+    ManagingButtonRoundingCorners="12.5"
+    WindowStartupLocation="CenterOwner">
+
+    <Window.DataContext>
+        <vm:ColorPickerWindowVM/>
+    </Window.DataContext>
+
+    <!--#region Hotkeys -->
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding UnconfirmSelectedColorComm}" Key="Esc"/>
+        <KeyBinding Command="{Binding ConfirmSelectedColorComm}" Key="Enter"/>
+    </Window.InputBindings>
+    <!--#endregion Hotkeys -->
+
+    <!--#region Main working panel -->
+    <Grid x:Name="MainWorkingPanel">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=ColorPickerWin, Path=IsActive}" Value="False">
+                        <Setter Property="Opacity" Value="0.7"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!--#region Panel with color picker -->
+        <pColorPicker:StandardColorPicker
+            x:Name="ColorPicker"
+            Grid.Row="0"
+            Style="{DynamicResource ColorPickerStandardStyle}"
+            SelectedColor="{Binding CurrentColor}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="ColorChanged">
+                    <i:InvokeCommandAction Command="{Binding GetSelectedColorComm}" CommandParameter="{Binding ElementName=ColorPicker, Path=SelectedColor}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </pColorPicker:StandardColorPicker>
+        <!--#endregion Panel with color picker -->
+
+        <!--#region Panel for comfirming or unconfirming selected color -->
+        <Grid
+            x:Name="PanelForConfirmingOrUnconfirmingSelectedColor"
+            Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <buttons:VectorIconButton 
+                x:Name="UnconfirmSelectedColor"
+                Grid.Column="1" 
+                IsTabStop="False" 
+                Style="{DynamicResource VectorIconButtoStandardStyle}"
+                VectorIcon="{DynamicResource UnconfirmIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}" 
+                VectorIconSize="25" VectorIconStretch="Uniform" VectorIconMargin="6"
+                TextVisibility="Collapsed"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Margin="6" 
+                RoundingCorners="12.5"
+                Command="{Binding UnconfirmSelectedColorComm}">
+                <buttons:VectorIconButton.ToolTip>
+                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                        <TextBlock Text="{DynamicResource UnconfirmActionToolTip}"/>
+                    </ToolTip>
+                </buttons:VectorIconButton.ToolTip>
+            </buttons:VectorIconButton>
+            <buttons:VectorIconButton 
+                x:Name="ConfirmSelectedColor"
+                Grid.Column="2" 
+                IsTabStop="False" 
+                Style="{DynamicResource VectorIconButtoStandardStyle}"
+                VectorIcon="{DynamicResource ConfirmIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}" 
+                VectorIconSize="25" VectorIconStretch="UniformToFill" VectorIconMargin="5, 6, 5, 6"
+                TextVisibility="Collapsed"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Margin="0, 6, 6, 6" 
+                RoundingCorners="12.5"
+                Command="{Binding ConfirmSelectedColorComm}">
+                <buttons:VectorIconButton.ToolTip>
+                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                        <TextBlock Text="{DynamicResource ConfirmActionToolTip}"/>
+                    </ToolTip>
+                </buttons:VectorIconButton.ToolTip>
+            </buttons:VectorIconButton>
+        </Grid>
+        <!--#endregion Panel for comfirming or unconfirming selected color -->
+
+    </Grid>
+    <!--#endregion Main working panel -->
+    
+</pwindow:PersonalizedWindow>

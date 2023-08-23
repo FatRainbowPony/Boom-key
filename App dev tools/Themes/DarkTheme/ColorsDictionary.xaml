@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="ContainerBackgroundBrush" Color="#FF1F1F1F"/>
+    <SolidColorBrush x:Key="ContainerBorderBrush" Color="#FF424242"/>
+    <SolidColorBrush x:Key="SubContainerBackgroundBrush" Color="#FF2E2E2E"/>
+    <SolidColorBrush x:Key="SubContainerBorderBrush" Color="#FF424242"/>
+    <SolidColorBrush x:Key="ControlBackgroundLightBrush" Color="#FF5B5B5B"/>
+    <SolidColorBrush x:Key="ControlBackgroundDarkBrush" Color="#FF383838"/>
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#FF424242"/>
+    <SolidColorBrush x:Key="ControlMouseMoveLightBrush" Color="#FF777777"/>
+    <SolidColorBrush x:Key="ControlMouseMoveDarkBrush" Color="#FF4D4D4D"/>
+    <SolidColorBrush x:Key="ControlSelectedBrush" Color="#FF777777"/>
+    <SolidColorBrush x:Key="TextForegroundBrush" Color="White"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FFD05454"/>
+    <SolidColorBrush x:Key="TurnOnBrush" Color="#FF92E492"/>
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="Black"/>
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF1F1F1F"/>
+    <SolidColorBrush x:Key="WindowBorderBrush" Color="#FF424242"/>
+    <SolidColorBrush x:Key="SwitcherBackgroundBrush" Color="White"/>
+    <SolidColorBrush x:Key="SwitcherBorderBrush" Color="#FFCCB7B7"/>
+    <SolidColorBrush x:Key="ToolTipBackgroundBrush" Color="#FF464646"/>
+    <SolidColorBrush x:Key="ToolTipBorderBrush" Color="#FF424242"/>
+</ResourceDictionary>

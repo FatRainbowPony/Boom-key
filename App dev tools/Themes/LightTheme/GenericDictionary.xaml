@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Dictionaries/VectorsDictionary.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Dictionaries/ConvertersDictionary.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Themes/LightTheme/UIStylesDictionary.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

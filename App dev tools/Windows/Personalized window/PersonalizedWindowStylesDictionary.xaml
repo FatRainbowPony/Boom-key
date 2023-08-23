@@ -1,0 +1,1049 @@
+﻿<ResourceDictionary x:Class="AppDevTools.Windows.PersonalizedWindow.PersonalizedWindowActions"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow"
+                    xmlns:buttons="clr-namespace:AppDevTools.Controls.Buttons">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Dictionaries/TextsDictionaries/Rus/TextsDictionary.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+    
+    <!--#region Title bar button -->
+    <Style x:Key="WinTitleBarButtonStyle" TargetType="buttons:VectorIconButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="VectorIconVisibility" Value="Visible"/>
+        <Setter Property="TextVisibility" Value="Collapsed"/>
+        <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="buttons:VectorIconButton">
+                    <Grid>
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Width="{TemplateBinding Width}" 
+                            Height="{TemplateBinding Height}"
+                            HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Stretch"
+                            CornerRadius="{TemplateBinding RoundingCorners}">
+                            <Path x:Name="Icon"
+                                Data="{TemplateBinding VectorIcon}"
+                                Visibility="{TemplateBinding VectorIconVisibility}"
+                                Fill="{TemplateBinding VectorIconFill}"
+                                Width="{TemplateBinding VectorIconSize}"
+                                Height="{TemplateBinding VectorIconSize}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="{TemplateBinding VectorIconStretch}"
+                                Margin="{TemplateBinding VectorIconMargin}">
+                                <Path.RenderTransform>
+                                    <ScaleTransform ScaleX="{TemplateBinding VectorIconScale}" ScaleY="{TemplateBinding VectorIconScale}"/>
+                                </Path.RenderTransform>
+                                <Path.RenderTransformOrigin>
+                                    <Point X="0.5" Y="0.5"/>
+                                </Path.RenderTransformOrigin>
+                            </Path>
+                        </Border>
+                        <Border x:Name="Border" CornerRadius="{TemplateBinding RoundingCorners}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="VectorIcon" Value="{x:Null}">
+                            <Setter Property="VectorIconVisibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="Gray"/>
+                            <Setter TargetName="Border" Property="Opacity" Value="0.3"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Title bar button -->
+
+    <!--#region Dialog window -->
+    <Style x:Key="WinDialogNoResizeStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid 
+                        TextOptions.TextRenderingMode="ClearType" 
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel 
+                                Background="Transparent"
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="TitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForDialog"
+                                    MouseMove="TitleBarMouseMove">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="Caption" 
+                                            Grid.Column="0"
+                                            Visibility="{TemplateBinding CaptionVisibility}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0"
+                                            FontFamily="Segoe UI"
+                                            FontSize="12"
+                                            Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{TemplateBinding CaptionForeground}"/>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="CloseButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="TitleBar" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WinDialogResizeStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel 
+                                Background="Transparent"
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="TitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForDialog"
+                                    MouseMove="TitleBarMouseMove">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="Caption" 
+                                            Grid.Column="0"
+                                            Visibility="{TemplateBinding CaptionVisibility}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0"
+                                            FontFamily="Segoe UI"
+                                            FontSize="12"
+                                            Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{TemplateBinding CaptionForeground}"/>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="CloseButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                         </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <Line x:Name="LineToResizeNorth"
+                            Stroke="Transparent"   
+                            StrokeThickness="3"
+                            Cursor="SizeNS"                              
+                            MouseDown="ResizeNorth"/>
+                        <Line x:Name="LineToResizeSouth"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            VerticalAlignment="Bottom"
+                            X1="1" X2="{TemplateBinding ActualWidth}" 
+                            Y1="{TemplateBinding ActualHeight}" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeNS"
+                            MouseDown="ResizeSouth"/>
+                        <Line x:Name="LineToResizeWest"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            X1="1" X2="1" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeWest"/>
+                        <Line x:Name="LineToResizeEast"                        
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            HorizontalAlignment="Right" 
+                            X1="{TemplateBinding ActualWidth}" X2="{TemplateBinding ActualWidth}" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeEast"/>
+                        <Rectangle x:Name="rectToResizeNorthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeNorthWest"/>
+                        <Rectangle x:Name="rectToResizeNorthEast" 
+                            Fill="Transparent"
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeNorthEast"/>
+                        <Rectangle x:Name="rectToResizeSouthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeSouthWest"/>
+                        <Rectangle x:Name="rectToResizeSouthEast" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeSouthEast"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="TitleBar" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Dialog window -->
+
+    <!--#region Hiding window -->
+    <Style x:Key="WinHidingNoResizeStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <EventSetter Event="KeyDown" Handler="HideHotkey"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel 
+                                Background="Transparent"
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="TitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForDialog"
+                                    MouseMove="TitleBarMouseMove"
+                                    KeyDown="HideHotkey">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="Caption" 
+                                            Grid.Column="0"
+                                            Visibility="{TemplateBinding CaptionVisibility}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0"
+                                            FontFamily="Segoe UI"
+                                            FontSize="12"
+                                            Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{TemplateBinding CaptionForeground}"/>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"                       
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="12.5"
+                                            Click="HideButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="TitleBar" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WinHidingResizeStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <EventSetter Event="KeyDown" Handler="HideHotkey"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel   
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="TitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForResize"
+                                    MouseMove="TitleBarMouseMove"
+                                    KeyDown="HideHotkey">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="Caption" 
+                                            Grid.Column="0"
+                                            Visibility="{TemplateBinding CaptionVisibility}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0"
+                                            FontFamily="Segoe UI"
+                                            FontSize="12"
+                                            Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{TemplateBinding CaptionForeground}"/>
+                                        <buttons:VectorIconButton x:Name="MinButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource MinimizeTaskbarIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11"  VectorIconStretch="Uniform" VectorIconMargin="0, 1, 0, 0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="MinButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource MinToTaskbarButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                        <buttons:VectorIconButton x:Name="MaxButton"
+                                            Grid.Column="2"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource MaximizeIcon}" VectorIconFill="{TemplateBinding CaptionForeground}"
+                                            VectorIconSize="11" VectorIconStretch="Uniform" VectorIconMargin="3"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="MaxButtonClick"/>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="3"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="HideButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <Line x:Name="LineToResizeNorth"
+                            Stroke="Transparent"   
+                            StrokeThickness="3"
+                            Cursor="SizeNS"                              
+                            MouseDown="ResizeNorth"/>
+                        <Line x:Name="LineToResizeSouth"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            VerticalAlignment="Bottom"
+                            X1="1" X2="{TemplateBinding ActualWidth}" 
+                            Y1="{TemplateBinding ActualHeight}" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeNS"
+                            MouseDown="ResizeSouth"/>
+                        <Line x:Name="LineToResizeWest"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            X1="1" X2="1" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeWest"/>
+                        <Line x:Name="LineToResizeEast"                        
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            HorizontalAlignment="Right" 
+                            X1="{TemplateBinding ActualWidth}" X2="{TemplateBinding ActualWidth}" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeEast"/>
+                        <Rectangle x:Name="rectToResizeNorthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeNorthWest"/>
+                        <Rectangle x:Name="rectToResizeNorthEast" 
+                            Fill="Transparent"
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeNorthEast"/>
+                        <Rectangle x:Name="rectToResizeSouthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeSouthWest"/>
+                        <Rectangle x:Name="rectToResizeSouthEast" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeSouthEast"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="TitleBar" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <Trigger Property="WindowState" Value="Maximized">
+                            <Setter Property="TitleBarRoundingCorners" Value="0"/>
+                            <Setter TargetName="PART_Border" Property="BorderBrush" Value="Transparent"/>
+                            <Setter TargetName="PART_Border" Property="BorderThickness" Value="0"/>
+                            <Setter TargetName="PART_Border" Property="CornerRadius" Value="0"/>
+                            <Setter TargetName="MaxButton" Property="VectorIcon" Value="{DynamicResource MinimizeToWinIcon}"/>
+                            <Setter TargetName="MaxButton" Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                        <TextBlock Text="{DynamicResource MinToNormalButtonWinToolTip}"/>
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="WindowState" Value="Normal">
+                            <Setter TargetName="MaxButton" Property="VectorIcon" Value="{DynamicResource MaximizeIcon}"/>
+                            <Setter TargetName="MaxButton" Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                        <TextBlock Text="{DynamicResource MaxButtonWinToolTip}"/>
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Hidiing window -->
+
+    <!--#region Standard window -->
+    <Style x:Key="WinStandardStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel   
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="TitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForResize"
+                                    MouseMove="TitleBarMouseMove">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="Caption" 
+                                            Grid.Column="0"
+                                            Visibility="{TemplateBinding CaptionVisibility}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0"
+                                            FontFamily="Segoe UI"
+                                            FontSize="12"
+                                            Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{TemplateBinding CaptionForeground}"/>
+                                        <buttons:VectorIconButton x:Name="MinButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource MinimizeTaskbarIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11"  VectorIconStretch="Uniform" VectorIconMargin="0, 1, 0, 0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="MinButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource MinToTaskbarButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                        <buttons:VectorIconButton x:Name="MaxButton"
+                                            Grid.Column="2"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource MaximizeIcon}" VectorIconFill="{TemplateBinding CaptionForeground}"
+                                            VectorIconSize="11" VectorIconStretch="Uniform" VectorIconMargin="3"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="MaxButtonClick"/>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="3"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="HideButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <Line x:Name="LineToResizeNorth"
+                            Stroke="Transparent"   
+                            StrokeThickness="3"
+                            Cursor="SizeNS"                              
+                            MouseDown="ResizeNorth"/>
+                        <Line x:Name="LineToResizeSouth"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            VerticalAlignment="Bottom"
+                            X1="1" X2="{TemplateBinding ActualWidth}" 
+                            Y1="{TemplateBinding ActualHeight}" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeNS"
+                            MouseDown="ResizeSouth"/>
+                        <Line x:Name="LineToResizeWest"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            X1="1" X2="1" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeWest"/>
+                        <Line x:Name="LineToResizeEast"                        
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            HorizontalAlignment="Right" 
+                            X1="{TemplateBinding ActualWidth}" X2="{TemplateBinding ActualWidth}" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeEast"/>
+                        <Rectangle x:Name="rectToResizeNorthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeNorthWest"/>
+                        <Rectangle x:Name="rectToResizeNorthEast" 
+                            Fill="Transparent"
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeNorthEast"/>
+                        <Rectangle x:Name="rectToResizeSouthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeSouthWest"/>
+                        <Rectangle x:Name="rectToResizeSouthEast" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeSouthEast"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="TitleBar" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <Trigger Property="WindowState" Value="Maximized">
+                            <Setter Property="TitleBarRoundingCorners" Value="0"/>
+                            <Setter TargetName="PART_Border" Property="BorderBrush" Value="Transparent"/>
+                            <Setter TargetName="PART_Border" Property="BorderThickness" Value="0"/>
+                            <Setter TargetName="PART_Border" Property="CornerRadius" Value="0"/>
+                            <Setter TargetName="MaxButton" Property="VectorIcon" Value="{DynamicResource MinimizeToWinIcon}"/>
+                            <Setter TargetName="MaxButton" Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                        <TextBlock Text="{DynamicResource MinToNormalButtonWinToolTip}"/>
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="WindowState" Value="Normal">
+                            <Setter TargetName="MaxButton" Property="VectorIcon" Value="{DynamicResource MaximizeIcon}"/>
+                            <Setter TargetName="MaxButton" Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                        <TextBlock Text="{DynamicResource MaxButtonWinToolTip}"/>
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Standard window -->
+
+    <!--#region Note window -->
+    <Style x:Key="WinNoteStandardStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel   
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="ActiveTitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForDialog"
+                                    MouseMove="TitleBarMouseMove">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="CloseButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <Border 
+                                    x:Name="NonactiveTitleBar"
+                                    DockPanel.Dock="Top"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    Height="10"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"/>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <Line x:Name="LineToResizeNorth"
+                            Stroke="Transparent"   
+                            StrokeThickness="3"
+                            Cursor="SizeNS"                              
+                            MouseDown="ResizeNorth"/>
+                        <Line x:Name="LineToResizeSouth"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            VerticalAlignment="Bottom"
+                            X1="1" X2="{TemplateBinding ActualWidth}" 
+                            Y1="{TemplateBinding ActualHeight}" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeNS"
+                            MouseDown="ResizeSouth"/>
+                        <Line x:Name="LineToResizeWest"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            X1="1" X2="1" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeWest"/>
+                        <Line x:Name="LineToResizeEast"                        
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            HorizontalAlignment="Right" 
+                            X1="{TemplateBinding ActualWidth}" X2="{TemplateBinding ActualWidth}" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeEast"/>
+                        <Rectangle x:Name="rectToResizeNorthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeNorthWest"/>
+                        <Rectangle x:Name="rectToResizeNorthEast" 
+                            Fill="Transparent"
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeNorthEast"/>
+                        <Rectangle x:Name="rectToResizeSouthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeSouthWest"/>
+                        <Rectangle x:Name="rectToResizeSouthEast" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeSouthEast"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="True">
+                            <Setter TargetName="ActiveTitleBar" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="NonactiveTitleBar" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="ActiveTitleBar" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="NonactiveTitleBar" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WinNoteHidingStyle" TargetType="pwindow:PersonalizedWindow">
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <EventSetter Event="KeyDown" Handler="HideHotkey"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pwindow:PersonalizedWindow">
+                    <Grid
+                        TextOptions.TextRenderingMode="ClearType"
+                        TextOptions.TextFormattingMode="Display">
+                        <Border x:Name="PART_Border"
+                            Width="{TemplateBinding Width}" MaxWidth="{TemplateBinding MaxWidth}"
+                            Height="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding WindowRoundingCorners}">
+                            <DockPanel   
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                VerticalAlignment="Stretch">
+                                <Border x:Name="ActiveTitleBar"
+                                    DockPanel.Dock="Top"
+                                    Visibility="{TemplateBinding TitleBarVisibility}"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    MouseLeftButtonDown="TitleBarMouseLeftButtonDownForDialog"
+                                    MouseMove="TitleBarMouseMove"
+                                    KeyDown="HideHotkey">
+                                    <Grid Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <buttons:VectorIconButton x:Name="CloseButton"
+                                            Grid.Column="1"
+                                            Visibility="{TemplateBinding ManagingButtonVisibility}"
+                                            Style="{DynamicResource WinTitleBarButtonStyle}"
+                                            VectorIcon="{DynamicResource CloseIcon}" VectorIconFill="{TemplateBinding CaptionForeground}" 
+                                            VectorIconSize="11" VectorIconStretch="UniformToFill" VectorIconMargin="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Width="{TemplateBinding ManagingButtonWidth}"
+                                            Height="{TemplateBinding ManagingButtonHeight}"
+                                            Margin="3"
+                                            RoundingCorners="{TemplateBinding ManagingButtonRoundingCorners}"
+                                            Click="HideButtonClick">
+                                            <buttons:VectorIconButton.ToolTip>
+                                                <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                                    <TextBlock Text="{DynamicResource CloseButtonWinToolTip}"/>
+                                                </ToolTip>
+                                            </buttons:VectorIconButton.ToolTip>
+                                        </buttons:VectorIconButton>
+                                    </Grid>
+                                </Border>
+                                <Border 
+                                    x:Name="NonactiveTitleBar"
+                                    DockPanel.Dock="Top"
+                                    Background="{TemplateBinding TitleBarBackground}"
+                                    Height="10"
+                                    CornerRadius="{TemplateBinding TitleBarRoundingCorners}"
+                                    KeyDown="HideHotkey"/>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <Line x:Name="LineToResizeNorth"
+                            Stroke="Transparent"   
+                            StrokeThickness="3"
+                            Cursor="SizeNS"                              
+                            MouseDown="ResizeNorth"/>
+                        <Line x:Name="LineToResizeSouth"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            VerticalAlignment="Bottom"
+                            X1="1" X2="{TemplateBinding ActualWidth}" 
+                            Y1="{TemplateBinding ActualHeight}" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeNS"
+                            MouseDown="ResizeSouth"/>
+                        <Line x:Name="LineToResizeWest"
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            X1="1" X2="1" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeWest"/>
+                        <Line x:Name="LineToResizeEast"                        
+                            Stroke="Transparent"
+                            StrokeThickness="3"
+                            HorizontalAlignment="Right" 
+                            X1="{TemplateBinding ActualWidth}" X2="{TemplateBinding ActualWidth}" 
+                            Y1="1" Y2="{TemplateBinding ActualHeight}"
+                            Cursor="SizeWE"
+                            MouseDown="ResizeEast"/>
+                        <Rectangle x:Name="rectToResizeNorthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeNorthWest"/>
+                        <Rectangle x:Name="rectToResizeNorthEast" 
+                            Fill="Transparent"
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeNorthEast"/>
+                        <Rectangle x:Name="rectToResizeSouthWest" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNESW" 
+                            MouseDown="ResizeSouthWest"/>
+                        <Rectangle x:Name="rectToResizeSouthEast" 
+                            Fill="Transparent" 
+                            Width="5" 
+                            Height="5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Cursor="SizeNWSE" 
+                            MouseDown="ResizeSouthEast"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="True">
+                            <Setter TargetName="ActiveTitleBar" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="NonactiveTitleBar" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsActive" Value="False">
+                            <Setter TargetName="ActiveTitleBar" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="NonactiveTitleBar" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Note window -->
+
+</ResourceDictionary>
