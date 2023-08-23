@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -111,7 +112,7 @@ namespace AppUpdateInstaller.ViewModels
 
                             notifierProgress.Dispose();
 
-                            //Process.Start(new ProcessStartInfo { FileName = Path.Combine(pathToSourceDir, $"{App.InstallerInfo.AppName}.exe") });
+                            Process.Start(new ProcessStartInfo { FileName = Path.Combine(pathToSourceDir, $"{App.InstallerInfo.AppName}.exe") });
                             Application.Current.Shutdown();
                         }
                     }                   

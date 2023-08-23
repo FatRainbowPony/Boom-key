@@ -260,7 +260,7 @@ namespace BoomKey
                 }
                 appDevToolsExts.File.Save(PathToInfoColors, PersonalizationColors);
 
-                UpdateLoader = new(new appUpdateLoader.Models.Settings("1.0.0", DeveloperNickname, RepositoryName, SourceName, Path.Combine(PathToUpdateDir, $"update.zip")));
+                UpdateLoader = new(new appUpdateLoader.Models.Settings(Version, DeveloperNickname, RepositoryName, SourceName, Path.Combine(PathToUpdateDir, $"update.zip")));
 
                 Task.Delay(2000).Wait();
 

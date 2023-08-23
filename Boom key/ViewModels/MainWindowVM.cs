@@ -192,8 +192,7 @@ namespace BoomKey.ViewModels
                                     { 
                                         Arguments = "\"" + Json.GetSerializedObj(new List<InstallerInfo>
                                         {
-                                            // изменить App.PathToIconAsFile на $"{App.PathToUpdateDir}\\Assets\\Icons\\DefAppIcon.ico"
-                                            new InstallerInfo(App.Name, App.PathToIconAsFile, App.PathToUpdateDir,
+                                            new InstallerInfo(App.Name, $"{App.PathToUpdateDir}\\Assets\\Icons\\DefAppIcon.ico", App.PathToUpdateDir,
                                             new NotificationContent
                                             {
                                                 Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
@@ -202,8 +201,7 @@ namespace BoomKey.ViewModels
                                                 Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"]
                                             })
                                         }).Replace("\"", "\\\"") + "\"",
-                                        // изменить App.PathToDir на App.PathToUpdateDir
-                                        FileName = Path.Combine(App.PathToDir, $"{InstallerInfo.InstallerName}.exe") 
+                                        FileName = Path.Combine(App.PathToUpdateDir, $"{InstallerInfo.InstallerName}.exe") 
                                     });
                                     CloseAppComm.Execute(null);
                                 },
