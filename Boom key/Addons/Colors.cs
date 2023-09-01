@@ -169,7 +169,7 @@ namespace BoomKey.Addons
         #region Methods
 
         #region Public
-        public static List<Color> GetAll()
+        public static List<Color> Get()
         {
             List<Color> colors = new();
 

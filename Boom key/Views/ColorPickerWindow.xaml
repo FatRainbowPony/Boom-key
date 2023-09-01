@@ -13,7 +13,7 @@
     mc:Ignorable="d"
     Title="{DynamicResource ColorPickerWindowTitle}" 
     Height="500" Width="350"
-    Style="{DynamicResource WinDialogNoResizeStyle}"
+    Style="{StaticResource WinDialogNoResizeStyle}"
     Background="{DynamicResource WindowBackgroundBrush}"
     BorderBrush="{DynamicResource WindowBorderBrush}"
     BorderThickness="1"

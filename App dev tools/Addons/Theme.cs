@@ -45,22 +45,16 @@ namespace AppDevTools.Addons
         #region Properties
 
         #region Public
-
-        #region Properties for specific register key
         /// <summary>
         /// Gets the specific register key
         /// </summary>
         public RegistryKey? RegistryKey { get; private set; }
-        #endregion Properties for specific register key
 
-        #region Properties for theme description
         /// <summary>
         /// Gets or sets the theme description
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public ThemeDescription Description { get; set; }
-        #endregion Properties for theme description
-
         #endregion Public
 
         #endregion Properties
@@ -68,8 +62,6 @@ namespace AppDevTools.Addons
         #region Constructors
 
         #region Public
-
-        #region Constructor for creating base on system theme
         /// <summary>
         /// Initializes a new instance of the Theme class based on the system theme
         /// </summary>
@@ -100,9 +92,7 @@ namespace AppDevTools.Addons
                 Description = ThemeDescription.None;
             }
         }
-        #endregion Constructor for creating base on system theme
 
-        #region Constructor for creating base on theme description
         /// <summary>
         /// Initializes a new instance of the Theme class with the specific theme description
         /// </summary>
@@ -113,8 +103,6 @@ namespace AppDevTools.Addons
         {
             Description = description;
         }
-        #endregion Constructor for creating base on theme description
-
         #endregion Public
 
         #endregion Construcotrs
@@ -372,16 +360,7 @@ namespace AppDevTools.Addons
                     }            
                 }
 
-                switch (Description)
-                {
-                    case ThemeDescription.LightTheme:
-                        app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(GetUriStringForTheme(Description)) });
-                        break;
-
-                    case ThemeDescription.DarkTheme:
-                        app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(GetUriStringForTheme(Description)) });
-                        break;
-                }
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(GetUriStringForTheme(Description)) });
             }
         }
         #endregion Methods for setting theme for application

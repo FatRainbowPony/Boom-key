@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using AppDevTools.Addons;
 using AppDevTools.Generators;
 using AppDevTools.Templates.MVVM.ViewModel.Base;
@@ -20,6 +21,7 @@ using NHotkey;
 using NHotkey.Wpf;
 using Notification.Wpf;
 using WindowsDesktop;
+using appDevToolsAddns = AppDevTools.Addons;
 using appDevToolsExts = AppDevTools.Extensions;
 
 namespace BoomKey.ViewModels
@@ -32,11 +34,14 @@ namespace BoomKey.ViewModels
         private Application currentApplication = Application.Current;
         private string appName = App.Name;
         private string pathToWindowInfo = App.PathToInfoMainWindow;
-        private BackgroundWorker inspectorAboutAppTheme;
+        private bool winTopmost;
+        private BackgroundWorker? inspectorAboutAppTheme;
+        private DispatcherTimer? inspectorAboutAppAutohide;
         private ObservableCollection<Section> sections = new();
         private Section? selectedSection;
         private Shortcut? selectedShortcut;
         private readonly List<string> pathsToDroppingObjs = new();
+        private bool showingDragDropEffects;
         #endregion Private
 
         #endregion Fields
@@ -62,6 +67,12 @@ namespace BoomKey.ViewModels
             set => Set(ref pathToWindowInfo, value);
         }
 
+        public bool WinTopmost
+        {
+            get => winTopmost;
+            set => Set(ref winTopmost, value);
+        }
+
         public ObservableCollection<Section> Sections
         {
             get => sections;
@@ -79,6 +90,12 @@ namespace BoomKey.ViewModels
             get => selectedShortcut;
             set => Set(ref selectedShortcut, value);
         }
+
+        public bool ShowingDragDropEffects
+        {
+            get => showingDragDropEffects;
+            set => Set(ref showingDragDropEffects, value);
+        }
         #endregion Public
 
         #endregion Properties
@@ -86,6 +103,79 @@ namespace BoomKey.ViewModels
         #region Methods
 
         #region Private
+
+        #region Method to download application update
+        private void DownloadAndInstallAppUpdate(appDevToolsAddns.AppUpdateLoader.Models.Update update)
+        {
+            update ??= new appDevToolsAddns.AppUpdateLoader.Models.Update();
+
+            App.NotificationManager.Show(new NotificationContent
+            {
+                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                Message = $"{Application.Current.Resources["UpdateDescription"]} {update.Version}",
+                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                Icon = App.Icon,
+                RightButtonContent = $"{Application.Current.Resources["DownloadUpdateDescription"]}",
+                RightButtonAction = () =>
+                {
+                    App.UpdateLoader.DownloadUpdate
+                    (
+                        update,
+                        new NotificationContent
+                        {
+                            Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                            Message = $"{Application.Current.Resources["LoadingUpdateDescription"]}",
+                            Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                            Icon = App.Icon
+                        },
+                        new NotificationContent
+                        {
+                            Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                            Message = $"{Application.Current.Resources["ErrorLoadingUpdateDescription"]}",
+                            Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                            Icon = App.Icon,
+                            CloseOnClick = true
+                        },
+                        new NotificationContent
+                        {
+                            Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                            Message = $"{Application.Current.Resources["ResultLoadingUpdateDescription"]} {update.Version}",
+                            Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
+                            Icon = App.Icon,
+                            RightButtonContent = $"{Application.Current.Resources["InstallUpdateDescription"]}",
+                            RightButtonAction = () =>
+                            {
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    Arguments = "\"" + Json.GetSerializedObj(new List<InstallerInfo>
+                                    {
+                                        new InstallerInfo(App.Name, $"{App.PathToUpdateDir}\\Assets\\Icons\\DefAppIcon.ico", App.PathToUpdateDir,
+                                        new NotificationContent
+                                        {
+                                            Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
+                                            Message = $"{Application.Current.Resources["InsallationUpdateDescription"]}",
+                                            Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
+                                            Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"]
+                                        })
+                                    }).Replace("\"", "\\\"") + "\"",
+                                    FileName = Path.Combine(App.PathToUpdateDir, $"{InstallerInfo.InstallerName}.exe")
+                                });
+                                CloseAppComm.Execute(null);
+                            },
+                            CloseOnClick = true
+                        }
+                    );
+                },
+                CloseOnClick = true
+            },
+            null,
+            TimeSpan.MaxValue);
+        }
+        #endregion Methods to download application update
 
         #region Method to restore info about shortcuts 
         private void RestoreInfoAboutShortcuts()
@@ -120,12 +210,26 @@ namespace BoomKey.ViewModels
         }
         #endregion Method to save info about shorcuts
 
+        #region Method to start the application autohide inspector
+        private void StartAppAutohideInspector()
+        {
+            if (App.Settings.TimeoutBeforeAutohide > 0)
+            {
+                inspectorAboutAppAutohide?.Stop();
+                inspectorAboutAppAutohide = null;
+                inspectorAboutAppAutohide = new DispatcherTimer { Interval = TimeSpan.FromSeconds(App.Settings.TimeoutBeforeAutohide) };
+                inspectorAboutAppAutohide.Tick += (sender, e) => { appDevToolsExts.Window.Hide(Application.Current, $"{Application.Current.Resources["MainWindowTitle"]}"); };
+                inspectorAboutAppAutohide.Start();
+            }
+        }
+        #endregion Method to start the application autohide inspector
+
         #region Method to start the application theme inspector
         private void StartAppThemeInspector()
         {
             inspectorAboutAppTheme = new() { WorkerSupportsCancellation = true };
             inspectorAboutAppTheme.DoWork += (obj, e) =>
-            {
+            {       
                 if (inspectorAboutAppTheme.CancellationPending)
                 {
                     e.Cancel = true;
@@ -133,10 +237,14 @@ namespace BoomKey.ViewModels
                     return;
                 }
 
-                Theme sysTheme = Theme.Get();
-                if (!sysTheme.IsEqual(Application.Current, Application.Current.Resources.MergedDictionaries.ToList()))
+                if (e.Argument is Settings settings && settings != null)
                 {
-                    sysTheme.Set(Application.Current, Application.Current.Resources.MergedDictionaries.ToList());
+                    if (!settings.Theme.IsEqual(Application.Current, Application.Current.Resources.MergedDictionaries.ToList()))
+                    {
+                        settings.Theme.Set(Application.Current, Application.Current.Resources.MergedDictionaries.ToList());
+                        settings.Lang.Set(Application.Current, Application.Current.Resources.MergedDictionaries.ToList());
+                        appDevToolsAddns.Colors.SetTitleBarColor(Application.Current, App.Settings.TitleBarColor);
+                    }
                 }
             };
             inspectorAboutAppTheme.RunWorkerCompleted += (obj, e) =>
@@ -146,78 +254,17 @@ namespace BoomKey.ViewModels
                     return;
                 }
 
-                inspectorAboutAppTheme.RunWorkerAsync();
+                inspectorAboutAppTheme.RunWorkerAsync(App.Settings);
             };
-            inspectorAboutAppTheme.RunWorkerAsync();
+            inspectorAboutAppTheme.RunWorkerAsync(App.Settings);
         }
         #endregion Method to start the application theme inspector
 
         #region Method to start the application update inspector
         private void StartAppUpdateInspector()
         {
-            App.UpdateLoader.UpdateAppeared += (update) =>
-            {
-                new NotificationManager().Show(new NotificationContent
-                {
-                    Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
-                    Message = $"{Application.Current.Resources["UpdateDescription"]} {update.Version}",
-                    Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
-                    Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
-                    Icon = App.Icon,
-                    RightButtonContent = $"{Application.Current.Resources["DownloadUpdateDescription"]}",
-                    RightButtonAction = () =>
-                    {
-                        App.UpdateLoader.DownloadUpdate
-                        (
-                            update,
-                            new NotificationContent 
-                            {
-                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
-                                Message = $"{Application.Current.Resources["LoadingUpdateDescription"]}",
-                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
-                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
-                                Icon = App.Icon
-                            },
-                            new NotificationContent
-                            {
-                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
-                                Message = $"{Application.Current.Resources["ResultLoadingUpdateDescription1"]} {update.Version} {Application.Current.Resources["ResultLoadingUpdateDescription2"]}",
-                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
-                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"],
-                                Icon = App.Icon,
-                                RightButtonContent = $"{Application.Current.Resources["InstallUpdateDescription"]}",
-                                RightButtonAction = () =>
-                                {
-                                    Process.Start(new ProcessStartInfo 
-                                    { 
-                                        Arguments = "\"" + Json.GetSerializedObj(new List<InstallerInfo>
-                                        {
-                                            new InstallerInfo(App.Name, $"{App.PathToUpdateDir}\\Assets\\Icons\\DefAppIcon.ico", App.PathToUpdateDir,
-                                            new NotificationContent
-                                            {
-                                                Title = $"{Application.Current.Resources["NotificationTitleUpdateDescription"]} {App.Name}",
-                                                Message = $"{Application.Current.Resources["InsallationUpdateDescription"]}",
-                                                Background = (SolidColorBrush)Application.Current.Resources["ContainerBackgroundBrush"],
-                                                Foreground = (SolidColorBrush)Application.Current.Resources["TextForegroundBrush"]
-                                            })
-                                        }).Replace("\"", "\\\"") + "\"",
-                                        FileName = Path.Combine(App.PathToUpdateDir, $"{InstallerInfo.InstallerName}.exe") 
-                                    });
-                                    CloseAppComm.Execute(null);
-                                },
-                                CloseOnClick = true
-                            }
-                        );
-                    },
-                    CloseOnClick = true
-                },
-                null,
-                TimeSpan.MaxValue);
-            };
-            App.UpdateLoader.UpdateSearchIsOver += () =>
-            {
-                App.UpdateLoader.StopSearchingUpdate();
-            };
+            App.UpdateLoader.UpdateAppeared += (update) => { DownloadAndInstallAppUpdate(update); };
+            App.UpdateLoader.UpdateSearchIsOver += () => { App.UpdateLoader.StopSearchingUpdate(); };
             App.UpdateLoader.SearchUpdate();
         }
         #endregion Method to start the application update inspector
@@ -267,10 +314,18 @@ namespace BoomKey.ViewModels
                 case Shortcut:
                     if (dropInfo.TargetItem is Section targetSection && targetSection != null && targetSection.Name != selectedSection!.Name)
                     {
+                        ShowingDragDropEffects = true;
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
                         dropInfo.Effects = DragDropEffects.Move;
                         dropInfo.EffectText = $"{Application.Current.Resources["MoveObjDescription"]}";
                         dropInfo.DestinationText = $"\"{targetSection.Name}\"";
+                    }
+
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts && targetShortcuts != null)
+                    {
+                        ShowingDragDropEffects = false;
+                        dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                        dropInfo.Effects = DragDropEffects.Move;
                     }
                     break;
 
@@ -291,7 +346,7 @@ namespace BoomKey.ViewModels
                         dropInfo.Effects = DragDropEffects.Copy;
                     }
 
-                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts && targetShortcuts != null &&
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> _targetShortcuts && _targetShortcuts != null &&
                         dropInfo.TargetItem is not Shortcut && pathsToDroppingObjs.Distinct().ToList().Count > 0)
                     {
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
@@ -330,8 +385,22 @@ namespace BoomKey.ViewModels
                         Shortcut newShortcut = new(droppingShortcut) { Name = NameGenerator.Start(droppingShortcut.Name!, (from _shortcut in targetSection.Shortcuts select _shortcut.Name).ToList()) };
                         SelectedSection!.Shortcuts.Remove(droppingShortcut);
                         targetSection.Shortcuts.Add(newShortcut);
-                        targetSection.Shortcuts = new ObservableCollection<Shortcut>(targetSection.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
                         SelectedSection = targetSection;
+                        AppDataChanged?.Invoke();
+                    }
+
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts)
+                    {
+                        targetShortcuts.Remove(droppingShortcut);
+                        try
+                        {
+                            targetShortcuts.Insert(dropInfo.InsertIndex, droppingShortcut);
+                        }
+                        catch
+                        {
+                            targetShortcuts.Add(droppingShortcut);
+                        }
+                        SelectedShortcut = targetShortcuts.ToList().Find(x => x.Name == droppingShortcut.Name);
                         AppDataChanged?.Invoke();
                     }
                     break;
@@ -343,18 +412,16 @@ namespace BoomKey.ViewModels
                         {
                             _targetSection.Shortcuts.Add(new Shortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in _targetSection.Shortcuts select shortcut.Name).ToList()), pathToObj));
                         }
-                        _targetSection.Shortcuts = new ObservableCollection<Shortcut>(_targetSection.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
                         SelectedSection = _targetSection;                     
                         AppDataChanged?.Invoke();
                     }
 
-                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> targetShortcuts)
+                    if (dropInfo.TargetCollection is ObservableCollection<Shortcut> _targetShortcuts)
                     {
                         foreach (string pathToObj in pathsToDroppingObjs)
                         {
-                            targetShortcuts.Add(new Shortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in targetShortcuts select shortcut.Name).ToList()), pathToObj));
+                            _targetShortcuts.Add(new Shortcut(NameGenerator.Start(Path.GetFileNameWithoutExtension(pathToObj), (from shortcut in _targetShortcuts select shortcut.Name).ToList()), pathToObj));
                         }
-                        targetShortcuts = new ObservableCollection<Shortcut>(targetShortcuts.ToList().OrderBy(x => x.Name).ToList());
                         AppDataChanged?.Invoke();
                     }
                     break;
@@ -565,6 +632,12 @@ namespace BoomKey.ViewModels
                         }
 
                         ShowAppComm.Execute(null);
+                        WinTopmost = App.Settings.UseTopmost;
+                        if (App.Settings.RunHidden)
+                        {
+                            HideAppComm.Execute(null);
+                        }
+
                         AppDataChanged += () => { SaveInfoAboutShortcuts(); };
 
                         StartAppThemeInspector();
@@ -575,6 +648,19 @@ namespace BoomKey.ViewModels
         }
         #endregion Command for startup window
 
+        #region Сommand for activated window
+        public ICommand ActivatedWinComm
+        {
+            get
+            {
+                return new CommandsVM((obj) =>
+                {
+                    StartAppAutohideInspector();
+                }, (obj) => true);
+            }
+        }
+        #endregion Сommand for activated window
+
         #region Command for closing window
         public ICommand ClosingWinComm
         {
@@ -582,7 +668,9 @@ namespace BoomKey.ViewModels
             {
                 return new CommandsVM((obj) =>
                 {
-                    inspectorAboutAppTheme.CancelAsync();
+                    inspectorAboutAppTheme?.CancelAsync();
+                    inspectorAboutAppAutohide?.Stop();
+                    inspectorAboutAppAutohide = null;
                 }, (obj) => true);
             }
         }
@@ -629,7 +717,9 @@ namespace BoomKey.ViewModels
             {
                 return new CommandsVM((obj) =>
                 {
-                    inspectorAboutAppTheme.CancelAsync();
+                    inspectorAboutAppTheme?.CancelAsync();
+                    inspectorAboutAppAutohide?.Stop();
+                    inspectorAboutAppAutohide = null;
                     Application.Current.Shutdown();
                 }, (obj) => true);
             }
@@ -645,7 +735,25 @@ namespace BoomKey.ViewModels
                 {
                     if (!appDevToolsExts.Window.IsOpened(Application.Current, $"{Application.Current.Resources["SettingsWindowTitle"]}"))
                     {
-                        new SettingsWindow { DataContext = new SettingsWindowVM() }.ShowDialog();
+                        SettingsWindowVM settingsWinContext = new();
+                        settingsWinContext.ChangedAutohide += (useAutohide) =>
+                        {
+                            if (useAutohide)
+                            {
+                                StartAppAutohideInspector();
+                            }
+                            else
+                            {
+                                inspectorAboutAppAutohide?.Stop();
+                                inspectorAboutAppAutohide = null;
+                            }
+                        };
+                        settingsWinContext.ChangedTopmost += (useTopmost) => { WinTopmost = useTopmost; };
+                        new SettingsWindow 
+                        { 
+                            DataContext = settingsWinContext,
+                            Owner = appDevToolsExts.Window.Get(Application.Current, $"{Application.Current.Resources["MainWindowTitle"]}")
+                        }.ShowDialog();
                     }
                 }, (obj) => true);
             }
@@ -714,7 +822,6 @@ namespace BoomKey.ViewModels
                         Clipboard.SetText(Json.GetSerializedObj(new List<Shortcut> { new Shortcut(shortcut) }));
                         HotkeyManager.Current.Remove(shortcut.HotKey.Name);
                         SelectedSection!.Shortcuts.Remove(shortcut);
-                        SelectedSection!.Shortcuts = new ObservableCollection<Shortcut>(selectedSection!.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
                         AppDataChanged?.Invoke();
                     }
                 }, (obj) => 
@@ -771,7 +878,6 @@ namespace BoomKey.ViewModels
                     }
                     RegisterHotKeyToShortcut(newShortcut, newShortcut.HotKey);
                     SelectedSection!.Shortcuts.Add(newShortcut);
-                    SelectedSection!.Shortcuts = new ObservableCollection<Shortcut>(selectedSection!.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
                     AppDataChanged?.Invoke();
 
                 }, (obj) => 
@@ -1058,19 +1164,19 @@ namespace BoomKey.ViewModels
                     if (parameter is Section section && section != null)
                     {
                         SolidColorBrush sectionBrush = section.Color;
-                        SectionColorSelectorWindowVM sectionColorSelectorWinContext = new()
+                        ColorSelectorWindowVM colorSelectorWinContext = new()
                         {
                             Title = $"{Application.Current.Resources["ChangingColorWindowTitle"]}: {section.Name}",
                             OriginalColor = sectionBrush.Color
                         };
-                        sectionColorSelectorWinContext.ColorSelected += (color) => 
+                        colorSelectorWinContext.ColorSelected += (color) => 
                         { 
                             SelectedSection!.Color = color;
                             AppDataChanged?.Invoke();
                         };
-                        new SectionColorSelectorWindow
+                        new ColorSelectorWindow
                         {
-                            DataContext = sectionColorSelectorWinContext,
+                            DataContext = colorSelectorWinContext,
                             Owner = appDevToolsExts.Window.Get(Application.Current, $"{Application.Current.Resources["MainWindowTitle"]}")
                         }.ShowDialog();
                     }

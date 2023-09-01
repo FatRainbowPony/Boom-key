@@ -58,7 +58,7 @@ namespace BoomKey.Models
         #region Public
         public Shortcut()
         {
-            CreationDate = DateTime.Today.ToString("F");
+            CreationDate = DateTime.Today.ToString("G");
             Icon = new BitmapImage(new Uri(uriStrToQuestionIcon));
             HotKey = new HotKey();
         }
@@ -77,7 +77,7 @@ namespace BoomKey.Models
         public Shortcut(string name, string pathToExetubaleObj)
         {
             Name = name;
-            CreationDate = DateTime.Now.ToString("F");
+            CreationDate = DateTime.Now.ToString("G");
             PathToExetubaleObj = pathToExetubaleObj;
             ImageSource? icon = GetIcon(pathToExetubaleObj);
             if (icon == null)

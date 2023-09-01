@@ -1,13 +1,720 @@
-﻿<Window x:Name="SettingsWin"
-        x:Class="BoomKey.Views.SettingsWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="SettingsWindow" 
-        Height="450" Width="800">
+﻿<pwindow:PersonalizedWindow 
+    x:Name="SettingsWin"
+    x:Class="BoomKey.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:addons="clr-namespace:AppDevTools.Addons;assembly=AppDevTools"
+    xmlns:buttons="clr-namespace:AppDevTools.Controls.Buttons;assembly=AppDevTools"
+    xmlns:checkboxs="clr-namespace:AppDevTools.Controls.CheckBoxs;assembly=AppDevTools"
+    xmlns:numericupdowns="clr-namespace:AppDevTools.Controls.NumericUpDowns;assembly=AppDevTools"
+    xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow;assembly=AppDevTools"
+    xmlns:vm="clr-namespace:BoomKey.ViewModels"
+    mc:Ignorable="d"
+    Title="{DynamicResource SettingsWindowTitle}"
+    Width="430" MinWidth="430"
+    Height="350" MinHeight="350"
+    IsEnabled="{Binding EnabledSettings}"
+    Style="{StaticResource WinDialogNoResizeStyle}"
+    addons:WindowBlur.IsEnabled="True"
+    Background="Transparent"
+    BorderBrush="{DynamicResource WindowBorderBrush}"
+    BorderThickness="1"
+    WindowRoundingCorners="5"
+    TitleBarVisibility="Visible"
+    TitleBarBackground="{DynamicResource TitleBarBackgroundBrush}"
+    TitleBarRoundingCorners="5, 5, 0, 0"
+    CaptionForeground="{DynamicResource TextForegroundBrush}"
+    ManagingButtonVisibility="Visible"
+    ManagingButtonHeight="25"
+    ManagingButtonWidth="25"
+    ManagingButtonRoundingCorners="12.5"                         
+    WindowStartupLocation="CenterOwner">
+
+    <Window.DataContext>
+        <vm:SettingsWindowVM/>
+    </Window.DataContext>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding StartupWinComm}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <!--#region Panel with settings sections -->
+        <Border
+            Grid.Column="0"
+            Background="{DynamicResource ContainerBackgroundBrush}"
+            BorderBrush="{DynamicResource ContainerBorderBrush}"
+            BorderThickness="0, 0, 2, 0"
+            CornerRadius="0, 0, 0, 5"
+            Opacity="0.90">
+            <ScrollViewer
+                Style="{DynamicResource ScrollViewerStandardStyle}"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                HorizontalScrollBarVisibility="Disabled" 
+                VerticalScrollBarVisibility="Auto">
+                <ListBox
+                    x:Name="SettingsSections"
+                    Style="{DynamicResource VerticalListBoxStandardStyle}"
+                    ItemContainerStyle="{DynamicResource ListBoxItemStandardStyle}"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    BorderThickness="0">
+                    <ListBoxItem
+                        x:Name="BehaviorSettings"
+                        Height="35"
+                        Margin="3, 2, 3, 2"
+                        IsSelected="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="31"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Path
+                                x:Name="IconSettingsBehavior"
+                                Grid.Column="0"
+                                Data="{DynamicResource BehaviorSettingsIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                Stretch="Uniform"
+                                Margin="8"/>
+                            <TextBlock
+                                x:Name="DescriptionSettingsBehavior"
+                                Grid.Column="1"
+                                Text="{DynamicResource BehaviorSettingsDescription}"
+                                TextAlignment="Left"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="0, 6, 6, 6"/>
+                        </Grid>
+                    </ListBoxItem>
+                    <ListBoxItem
+                        x:Name="AppearanceSettings"
+                        Height="35"
+                        Margin="3, 2, 3, 2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="31"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Path
+                                x:Name="IconSettingsAppearance"
+                                Grid.Column="0"
+                                Data="{DynamicResource AppearanceSettingsIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                Stretch="Uniform"
+                                Margin="8"/>
+                            <TextBlock
+                                x:Name="DescriptionSettingsAppearance"
+                                Grid.Column="1"
+                                Text="{DynamicResource AppearanceSettingsDescription}"
+                                TextAlignment="Left"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="0, 6, 6, 6"/>
+                        </Grid>
+                    </ListBoxItem>
+                    <ListBoxItem 
+                        x:Name="LangSettings"
+                        Height="35"
+                        Margin="3, 2, 3, 2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="31"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Path 
+                                x:Name="IconSettingsLang"
+                                Data="{DynamicResource LangSettingsIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                Stretch="Uniform"
+                                Margin="6"/>
+                            <TextBlock
+                                x:Name="DescriptionSettingsLang"
+                                Grid.Column="1"
+                                Text="{DynamicResource LangSettingsDescription}"
+                                TextAlignment="Left"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="0, 6, 6, 6"/>
+                        </Grid>
+                    </ListBoxItem>
+                    <ListBoxItem
+                        x:Name="UpdateSettings"
+                        Height="35"
+                        Margin="3, 2, 3, 2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="31"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Path
+                                x:Name="IconUpdateSettings"
+                                Grid.Column="0"
+                                Data="{DynamicResource RestartIcon}"
+                                Fill="{DynamicResource TextForegroundBrush}"
+                                Stretch="UniformToFill"
+                                Margin="8"/>
+                            <TextBlock
+                                x:Name="DescriptionSettingsUpdate"
+                                Grid.Column="1"
+                                Text="{DynamicResource UpdateSettingsDescription}"
+                                TextAlignment="Left"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="0, 6, 6, 6"/>
+                        </Grid>
+                    </ListBoxItem>
+                </ListBox>
+            </ScrollViewer>
+        </Border>
+        <!--#endregion Panel with settings sections -->
+
+        <!--#region Panel with settings behavior -->
+        <Border
+            x:Name="SettingsBehavior"
+            Grid.Column="1"
+            Visibility="{Binding ElementName=BehaviorSettings, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}"
+            Background="{DynamicResource ContainerBackgroundBrush}"
+            CornerRadius="0, 0, 5, 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Name="TitleBehaviorSettings"
+                    Grid.Row="0"
+                    Text="{DynamicResource BehaviorSettingsDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6, 6, 6, 3"/>
+                <Separator
+                    Grid.Row="0"
+                    Background="{DynamicResource ControlBorderBrush}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Margin="3, 0, 3, 0"/>
+                <TextBlock
+                    x:Name="Autorun"
+                    Grid.Row="1"
+                    Text="{DynamicResource UseAutorunDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <checkboxs:VectorIconCheckBox
+                    x:Name="UseAutorun"
+                    Grid.Row="2"
+                    IsChecked="{Binding UseAutorun, UpdateSourceTrigger=PropertyChanged}"
+                    Margin="6, 0, 6, 0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Checked">
+                            <i:InvokeCommandAction Command="{Binding SetAutotunComm}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Unchecked">
+                            <i:InvokeCommandAction Command="{Binding DelAutorunComm}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <checkboxs:VectorIconCheckBox.Style>
+                        <Style BasedOn="{StaticResource VectorIconCheckBoxStandardStyle}" TargetType="checkboxs:VectorIconCheckBox">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Text" Value="{DynamicResource OnSettingsDescription}"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Text" Value="{DynamicResource OffSettingsDescription}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </checkboxs:VectorIconCheckBox.Style>
+                </checkboxs:VectorIconCheckBox>
+                <TextBlock
+                    x:Name="TimeoutBeforeAutorun"
+                    Grid.Row="3"
+                    Text="{DynamicResource TimeoutBeforeAutorunDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <numericupdowns:NumericUpDown
+                        x:Name="SetTimeoutBeforeAutorun"
+                        Grid.Column="0"
+                        Style="{DynamicResource NumericUpDownStandardStyle}"
+                        Value="{Binding TimeoutBeforeAutorun, UpdateSourceTrigger=PropertyChanged}"
+                        Minimum="0"
+                        Maximum="5"
+                        Increment="1"
+                        Height="20"
+                        Margin="6, 0, 6, 0">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="ValueChanged">
+                                <i:InvokeCommandAction 
+                                    Command="{Binding SetTimeoutBeforeAutorunComm}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </numericupdowns:NumericUpDown>
+                    <TextBlock
+                        x:Name="UnitMeasurementTimeoutBeforeAutorun"
+                        Grid.Column="1"
+                        Text="{DynamicResource UnitMeasurementTimeoutBeforeAutorunDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock
+                    x:Name="RunHidden"
+                    Grid.Row="5"
+                    Text="{DynamicResource RunHiddenDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <checkboxs:VectorIconCheckBox
+                    x:Name="UseRunningHidden"
+                    Grid.Row="6"
+                    IsChecked="{Binding RunHidden, UpdateSourceTrigger=PropertyChanged}"
+                    Margin="6, 0, 6, 0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Checked">
+                            <i:InvokeCommandAction Command="{Binding SetRunHiddenComm}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Unchecked">
+                            <i:InvokeCommandAction Command="{Binding DelRunHiddenComm}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <checkboxs:VectorIconCheckBox.Style>
+                        <Style BasedOn="{StaticResource VectorIconCheckBoxStandardStyle}" TargetType="checkboxs:VectorIconCheckBox">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Text" Value="{DynamicResource OnSettingsDescription}"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Text" Value="{DynamicResource OffSettingsDescription}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </checkboxs:VectorIconCheckBox.Style>
+                </checkboxs:VectorIconCheckBox>
+                <TextBlock
+                    x:Name="TimeoutBeforeAutohide"
+                    Grid.Row="7"
+                    Text="{DynamicResource TimeoutBeforeAutohideDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <Grid Grid.Row="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <numericupdowns:NumericUpDown
+                        x:Name="SetTimeoutBeforeAutohide"
+                        Grid.Column="0"
+                        Style="{DynamicResource NumericUpDownStandardStyle}"
+                        Value="{Binding TimeoutBeforeAutohide, UpdateSourceTrigger=PropertyChanged}"
+                        Minimum="0"
+                        Maximum="60"
+                        Increment="10"
+                        Height="20"
+                        Margin="6, 0, 6, 0">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="ValueChanged">
+                                <i:InvokeCommandAction 
+                                    Command="{Binding SetTimeoutBeforeAutohideComm}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </numericupdowns:NumericUpDown>
+                    <TextBlock
+                        x:Name="UnitMeasurementTimeoutBeforeAutohide"
+                        Grid.Column="1"
+                        Text="{DynamicResource UnitMeasurementTimeoutBeforeAutohideDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock
+                    x:Name="Topmost"
+                    Grid.Row="9"
+                    Text="{DynamicResource UseTopmostDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <checkboxs:VectorIconCheckBox
+                    x:Name="UseTopmost"
+                    Grid.Row="10"
+                    IsChecked="{Binding UseTopmost, UpdateSourceTrigger=PropertyChanged}"
+                    Margin="6, 0, 6, 0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Checked">
+                            <i:InvokeCommandAction Command="{Binding SetTopmostComm}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Unchecked">
+                            <i:InvokeCommandAction Command="{Binding DelTopmostComm}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <checkboxs:VectorIconCheckBox.Style>
+                        <Style BasedOn="{StaticResource VectorIconCheckBoxStandardStyle}" TargetType="checkboxs:VectorIconCheckBox">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Text" Value="{DynamicResource OnSettingsDescription}"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Text" Value="{DynamicResource OffSettingsDescription}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </checkboxs:VectorIconCheckBox.Style>
+                </checkboxs:VectorIconCheckBox>
+            </Grid>
+        </Border>
+        <!--#endregion Panel with settings bahavior -->
+
+        <!--#region Panel with settings appearance -->
+        <Border
+            x:Name="SettingsAppearance"
+            Grid.Column="1"
+            Visibility="{Binding ElementName=AppearanceSettings, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}"
+            Background="{DynamicResource ContainerBackgroundBrush}"
+            CornerRadius="0, 0, 5, 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Name="TitleAppearanceSettings"
+                    Grid.Row="0"
+                    Text="{DynamicResource AppearanceSettingsDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6, 6, 6, 3"/>
+                <Separator
+                    Grid.Row="0"
+                    Background="{DynamicResource ControlBorderBrush}"
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Bottom"
+                    Margin="3, 0, 3, 0"/>
+                <TextBlock
+                    x:Name="ThemeSettings"
+                    Grid.Row="1"
+                    Text="{DynamicResource ThemeDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <Grid 
+                    Grid.Row="2"
+                    Margin="0, 0, 0, 6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Path 
+                            x:Name="LightThemeIcon"
+                            Grid.Row="0"
+                            Data="{DynamicResource LightThemeIcon}"
+                            Fill="{DynamicResource TextForegroundBrush}"
+                            Stretch="Uniform"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="10, 0, 10, 3"/>
+                        <CheckBox
+                            x:Name="UseLightTheme"
+                            Grid.Row="1"
+                            IsChecked="{Binding UseLightTheme, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{DynamicResource CheckBoxStandardStyle}"
+                            Content="{DynamicResource LightThemeDescription}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="6, 0, 6, 0"
+                            Command="{Binding SetLightThemeComm}"/>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Path
+                            x:Name="DarkThemeIcon"
+                            Grid.Row="0"
+                            Data="{DynamicResource DarkThemeIcon}"
+                            Fill="{DynamicResource TextForegroundBrush}"
+                            Stretch="Uniform"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="10, 0, 10, 3"/>
+                        <CheckBox
+                            x:Name="UseDarkTheme"
+                            Grid.Row="1"
+                            IsChecked="{Binding UseDarkTheme, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{DynamicResource CheckBoxStandardStyle}"
+                            Content="{DynamicResource DarkThemeDescription}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="6, 0, 6, 0"
+                            Command="{Binding SetDarkThemeComm}"/>
+                    </Grid>
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Path
+                            x:Name="SysThemeIcon"
+                            Grid.Row="0"
+                            Data="{DynamicResource SysThemeIcon}"
+                            Fill="{DynamicResource TextForegroundBrush}"
+                            Stretch="Uniform"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="10, 0, 10, 3"/>
+                        <CheckBox
+                            x:Name="UseSysTheme"
+                            Grid.Row="1"
+                            IsChecked="{Binding UseSysTheme, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{DynamicResource CheckBoxStandardStyle}"
+                            Content="{DynamicResource SysThemeDescription}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="6, 0, 6, 0"
+                            Command="{Binding SetSysThemeComm}"/>
+                    </Grid>
+                </Grid>
+                <TextBlock
+                    x:Name="TtileBarColor"
+                    Grid.Row="3"
+                    Text="{DynamicResource ColorTitleBarDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6"/>
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border
+                        x:Name="CurrentTitleBarColor"
+                        Grid.Column="0"
+                        Background="{Binding CurrentTitleBarColor}"
+                        BorderBrush="{DynamicResource ContainerBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Height="25"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Margin="6, 0, 6, 0"/>
+                    <buttons:VectorIconButton
+                        x:Name="ChangeTitleBarColor"
+                        Grid.Column="1"
+                        IsTabStop="False" 
+                        Style="{DynamicResource VectorIconButtoStandardStyle}"
+                        VectorIcon="{DynamicResource EditIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}" 
+                        VectorIconSize="25" VectorIconStretch="Uniform" VectorIconMargin="5, 6, 5, 6"
+                        TextVisibility="Collapsed"
+                        HorizontalAlignment="Stretch" 
+                        VerticalAlignment="Top" 
+                        Margin="0, 0, 6, 0" 
+                        RoundingCorners="12.5"
+                        Command="{Binding ChangeTitleBarColorComm}">
+                        <buttons:VectorIconButton.ToolTip>
+                            <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                                <TextBlock Text="{DynamicResource ChangeTitleBarColorToolTip}"/>
+                            </ToolTip>
+                        </buttons:VectorIconButton.ToolTip>
+                    </buttons:VectorIconButton>
+                </Grid>
+            </Grid>
+        </Border>
+        <!--#endregion Panel with settings appearance -->
+
+        <!--#region Panel with settings language -->
+        <Border
+            x:Name="SettingsLanguage"
+            Grid.Column="1"
+            Visibility="{Binding ElementName=LangSettings, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}"
+            Background="{DynamicResource ContainerBackgroundBrush}"
+            CornerRadius="0, 0, 5, 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Name="TitleSettingsLang"
+                    Grid.Row="0"
+                    Text="{DynamicResource LangSettingsDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6, 6, 6, 3"/>
+                <Separator
+                    Grid.Row="0"
+                    Background="{DynamicResource ControlBorderBrush}"
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Bottom"
+                    Margin="3, 0, 3, 0"/>
+                <TextBlock
+                    Grid.Row="1"
+                    Text="{DynamicResource LangInterfaceDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6, 6, 6, 3"/>
+                <ComboBox
+                    x:Name="Langs"
+                    Grid.Row="2"
+                    ItemsSource="{Binding Langs}"
+                    SelectedItem="{Binding SelectedLang}"
+                    Style="{DynamicResource ComboBoxStandardStyle}"
+                    Height="20"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Margin="6, 0, 6, 0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction
+                                Command="{Binding ChangeLangComm}"
+                                CommandParameter="{Binding ElementName=Langs, Path=SelectedItem}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ComboBox>
+            </Grid>
+        </Border>
+        <!--#endregion Panel with settings language -->
+
+        <!--#region Panel with settings update -->
+        <Border
+            x:Name="SettingsUpdate"
+            Grid.Column="1"
+            Visibility="{Binding ElementName=UpdateSettings, Path=IsSelected, Converter={StaticResource BolleanToVisibility}}"
+            Background="{DynamicResource ContainerBackgroundBrush}"
+            CornerRadius="0, 0, 5, 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Name="TitleSettingsUpdate"
+                    Grid.Row="0"
+                    Text="{DynamicResource UpdateSettingsDescription}"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6, 6, 6, 3"/>
+                <Separator
+                    Grid.Row="0"
+                    Background="{DynamicResource ControlBorderBrush}"
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Bottom"
+                    Margin="3, 0, 3, 0"/>
+                <TextBlock
+                    x:Name="CurrentVersionApp"
+                    Grid.Row="1"
+                    TextAlignment="Left"
+                    Foreground="{DynamicResource TextForegroundBrush}"
+                    FontSize="15"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="6">
+                    <Run Text="{DynamicResource CurrentVersionAppDescription}"/>
+                    <Run Text="{Binding AppVersion, UpdateSourceTrigger=PropertyChanged}"/>
+                </TextBlock>
+                <buttons:VectorIconButton
+                    x:Name="CheckUpdate"
+                    Grid.Row="2"
+                    IsTabStop="False" 
+                    Style="{DynamicResource VectorIconButtoStandardStyle}"
+                    Background="{DynamicResource ControlBackgroundDarkBrush}"
+                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="1"
+                    VectorIconVisibility="Collapsed"
+                    TextVisibility="Visible"
+                    Text="{DynamicResource CheckUpdateDescription}"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    Width="70"
+                    Height="20"
+                    Margin="6, 0, 6, 0" 
+                    RoundingCorners="5"
+                    Command="{Binding CheckUpdateComm}">
+                    <buttons:VectorIconButton.ToolTip>
+                        <ToolTip Style="{DynamicResource ToolTipStandardStyle}">
+                            <TextBlock Text="{DynamicResource CheckUpdateToolTip}"/>
+                        </ToolTip>
+                    </buttons:VectorIconButton.ToolTip>
+                </buttons:VectorIconButton>
+            </Grid>
+        </Border>
+        <!--#endregion Panel with settings update -->
+
     </Grid>
-</Window>
+</pwindow:PersonalizedWindow>

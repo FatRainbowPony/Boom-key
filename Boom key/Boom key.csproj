@@ -9,8 +9,8 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <AssemblyName>Boom key</AssemblyName>
     <ApplicationIcon>Assets\Icons\TrayAppIcon.ico</ApplicationIcon>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,10 +39,6 @@
     <Resource Include="Assets\Icons\TrayAppIcon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Dictionaries\TextsDictionaries\Eng\" />
   </ItemGroup>
 
 </Project>

@@ -5,12 +5,12 @@ namespace BoomKey.Views
     /// <summary>
     /// Логика взаимодействия для SectionColorSelectorWindow.xaml
     /// </summary>
-    public partial class SectionColorSelectorWindow : PersonalizedWindow
+    public partial class ColorSelectorWindow : PersonalizedWindow
     {
         #region Constructors
 
         #region Public
-        public SectionColorSelectorWindow()
+        public ColorSelectorWindow()
         {
             InitializeComponent();
         }

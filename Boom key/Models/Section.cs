@@ -89,7 +89,7 @@ namespace BoomKey.Models
             }
             else
             {
-                colors = Addons.Colors.GetAll();
+                colors = Addons.Colors.Get();
             }
 
             for (int i = 0; i < colors.Count; i++)

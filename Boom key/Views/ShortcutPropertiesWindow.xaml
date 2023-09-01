@@ -147,7 +147,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Column="0"
-                    Text="{Binding StringFormat={}{0}:, Source={StaticResource PathToShortcutDescription}, Mode=OneWay}"
+                    Text="{DynamicResource PathToShortcutDescription}"
                     TextAlignment="Left"
                     Foreground="{DynamicResource TextForegroundBrush}"
                     HorizontalAlignment="Left"
@@ -178,7 +178,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Column="0"
-                    Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"
+                    Text="{DynamicResource HotKeyShortcutDescription}"
                     TextAlignment="Left"
                     Foreground="{DynamicResource TextForegroundBrush}"
                     HorizontalAlignment="Left"
@@ -230,7 +230,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Column="0"
-                    Text="{Binding StringFormat={}{0}:, Source={StaticResource CreationDateShortcutDescription}, Mode=OneWay}"
+                    Text="{DynamicResource CreationDateShortcutDescription}"
                     TextAlignment="Left"
                     Foreground="{DynamicResource TextForegroundBrush}"
                     HorizontalAlignment="Left"

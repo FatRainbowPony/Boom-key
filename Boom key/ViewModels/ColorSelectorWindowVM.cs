@@ -12,7 +12,7 @@ using appDevToolsExts = AppDevTools.Extensions;
 
 namespace BoomKey.ViewModels
 {
-    public class SectionColorSelectorWindowVM : ViewModel
+    public class ColorSelectorWindowVM : ViewModel
     {
         #region Fields
 
@@ -86,7 +86,7 @@ namespace BoomKey.ViewModels
         {
             get
             {
-                return new CommandsVM(async (obj) =>
+                return new CommandsVM((obj) =>
                 {
                     Title ??= $"{Application.Current.Resources["ChangingColorWindowTitle"]}";
 

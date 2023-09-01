@@ -32,7 +32,8 @@
     ManagingButtonHeight="25"
     ManagingButtonWidth="25"
     ManagingButtonRoundingCorners="12.5"                         
-    WindowStartupLocation="CenterScreen">
+    WindowStartupLocation="CenterScreen"
+    Topmost="{Binding WinTopmost}">
 
     <Window.DataContext>
         <vm:MainWindowVM/>
@@ -70,6 +71,9 @@
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding StartupWinComm}"/>
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Activated">
+            <i:InvokeCommandAction Command="{Binding ActivatedWinComm}"/>
         </i:EventTrigger>
         <i:EventTrigger EventName="Closing">
             <i:InvokeCommandAction Command="{Binding ClosingWinComm}"/>
@@ -114,6 +118,7 @@
                         VectorIcon="{DynamicResource ShowViewingIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}"  
                         VectorIconSize="13" VectorIconStretch="Uniform"
                         Header="{DynamicResource ShowAppDescription}"
+                        InputGestureText="Ctrl+Plus"
                         Margin="1"
                         Command="{Binding ShowAppComm}"/>
                     <menuitems:VectorIconMenuItem 
@@ -122,18 +127,18 @@
                         VectorIcon="{DynamicResource HideViewingIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}" 
                         VectorIconSize="13" VectorIconStretch="UniformToFill"
                         Header="{DynamicResource HideAppDescription}"
+                        InputGestureText="Ctrl+Minus"
                         Margin="1"
                         Command="{Binding HideAppComm}"/>
                     <Separator Style="{DynamicResource SeparatorStandardStyle}"/>
                     <menuitems:VectorIconMenuItem 
                         x:Name="ShowSettingsWin"
-                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
+                        Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"               
                         VectorIcon="{DynamicResource SettingsAsGearIcon}" VectorIconFill="{DynamicResource TextForegroundBrush}" 
                         VectorIconSize="13" VectorIconStretch="UniformToFill"
                         Header="{DynamicResource SettingsDescription}"
                         Margin="1"
-                        Command="{Binding ShowSettingsWinComm}"
-                        IsEnabled="False"/>
+                        Command="{Binding ShowSettingsWinComm}"/>
                     <menuitems:VectorIconMenuItem 
                         x:Name="ShowAboutProgramWin"
                         Template="{DynamicResource SubMenuItemWithoutChildStandardTemplate}"
@@ -289,7 +294,7 @@
                                                         HorizontalAlignment="Left" 
                                                         VerticalAlignment="Center" 
                                                         Margin="3, 0, 3, 3">
-                                                        <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource CountShortcutsInSectionToolTip}, Mode=OneWay}"/>
+                                                        <Run Text="{DynamicResource CountShortcutsInSectionToolTip}"/>
                                                         <Run Text="{Binding Shortcuts.Count, Mode=OneWay}"/>
                                                     </TextBlock>
                                                 </Grid>
@@ -403,7 +408,7 @@
                                 BorderBrush="Transparent"
                                 BorderThickness="0"
                                 dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
-                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="{Binding ShowingDragDropEffects}"
                                 ItemsSource="{Binding SelectedSection.Shortcuts}" 
                                 SelectedItem="{Binding SelectedShortcut}"
 						        ContextMenu="{DynamicResource ContextMenuForShortcut}">
@@ -469,7 +474,7 @@
                                                             HorizontalAlignment="Left" 
                                                             VerticalAlignment="Center" 
                                                             Margin="3, 0, 3, 3">
-                                                            <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
+                                                            <Run Text="{DynamicResource HotKeyShortcutDescription}"/>
                                                             <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
@@ -529,7 +534,7 @@
                                 BorderBrush="Transparent"
                                 BorderThickness="0"
                                 dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" 
-                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultEffectDataTemplate="{Binding ShowingDragDropEffects}"
                                 ItemsSource="{Binding SelectedSection.Shortcuts}" 
                                 SelectedItem="{Binding SelectedShortcut}"
                                 ContextMenu="{DynamicResource ContextMenuForShortcut}">
@@ -592,7 +597,7 @@
                                                             HorizontalAlignment="Left" 
                                                             VerticalAlignment="Center" 
                                                             Margin="3, 0, 3, 3">
-                                                            <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource HotKeyShortcutDescription}, Mode=OneWay}"/>
+                                                            <Run Text="{DynamicResource HotKeyShortcutDescription}"/>
                                                             <Run Text="{Binding HotKey.Combination.MultModifierKey, Converter={StaticResource InputToString}}"/><Run Text="{Binding HotKey.Combination.Key, Converter={StaticResource InputToString}}"/>
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
@@ -810,7 +815,7 @@
                         HorizontalAlignment="Left" 
                         VerticalAlignment="Center" 
                         Margin="6, 3, 3, 3">
-                        <Run Text="{Binding StringFormat={}{0}:, Source={StaticResource CountShortcutsInSectionDescription}, Mode=OneWay}"/>
+                        <Run Text="{DynamicResource CountShortcutsInSectionDescription}"/>
                         <Run Text="{Binding SelectedSection.Shortcuts.Count, Mode=OneWay}"/>
                         <TextBlock.ToolTip>
                             <ToolTip Style="{DynamicResource ToolTipStandardStyle}">

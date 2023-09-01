@@ -11,13 +11,14 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using AppDevTools.Addons;
 using AppDevTools.Addons.AppUpdateLoader;
 using AppDevTools.Windows.LoadingWindow.ViewModels;
 using AppDevTools.Windows.LoadingWindow.Views;
 using AppUpdateInstaller.Models;
 using BoomKey.Models;
+using Notification.Wpf;
 using SingleInstanceCore;
+using appDevToolsAddns = AppDevTools.Addons;
 using appDevToolsExts = AppDevTools.Extensions;
 using appUpdateLoader = AppDevTools.Addons.AppUpdateLoader;
 using loadingWin = AppDevTools.Windows.LoadingWindow;
@@ -40,9 +41,8 @@ namespace BoomKey
         private const string DEF_FILENAME_INFO_SHORTCUTS = "shortcuts.info";
         private const string DEF_DIRNAME_INFO_WINDOWS = "windows";
         private const string DEF_FILENAME_INFO_MAIN_WINDOW = "main.info";
-        private const string DEF_FILENAME_INFO_SUB_WINDOW = "sub.info";
         private const string DEF_FILENAME_INFO_COLORS = "colors.info";
-        //private const string DEF_SETTINGS_NAME = "settings.config";
+        private const string DEF_SETTINGS_NAME = "settings.config";
         #endregion Private
 
         #endregion Constants
@@ -88,15 +88,15 @@ namespace BoomKey
 
         public static string PathToInfoMainWindow { get; private set; }
 
-        public static string PathToInfoSubWindow { get; private set; }
-
         public static string PathToInfoColors { get; private set; }
 
         public static List<SolidColorBrush> PersonalizationColors { get; private set; }
 
-        //public static string PathToSettings { get; private set; }
+        public static string PathToSettings { get; private set; }
 
-        //public static Settings Settings { get; set; }
+        public static Settings Settings { get; set; }
+
+        public static NotificationManager NotificationManager { get; private set; }
 
         public static UpdateLoader UpdateLoader { get; private set; }
 
@@ -119,23 +119,7 @@ namespace BoomKey
                 Current.Shutdown();
             }
             else
-            {
-                //PathToSettings = Path.Combine(PathToWorkingDir, DEF_SETTINGS_NAME);
-                //if (!File.Exists(PathToSettings))
-                //{
-                //    File.Create(PathToSettings).Close();
-                //}
-                //List<Settings>? contentSettings = appDevToolsExts.File.Load<Settings>(PathToSettings);
-                //if (contentSettings != null && contentSettings.FirstOrDefault() != null)
-                //{
-                //    Settings = new Settings(contentSettings.First());
-                //}
-                //else
-                //{
-                //    Settings = new Settings();
-                //}
-                //appDevToolsExts.File.Save(PathToSettings, new List<Settings> { Settings });
-                
+            {                
                 DeveloperNickname = DEF_DEVELOPER_NICKNAME;
                 RepositoryName = DEF_REPOSITORY_NAME;
                 SourceName = DEF_SOURCE_NAME;
@@ -153,19 +137,31 @@ namespace BoomKey
                 PathToIconAsResource = $"pack://application:,,,/{Name};component/Assets/Icons/TrayAppIcon.ico";
                 Icon = new BitmapImage(new Uri(PathToIconAsResource));
 
-                Theme sysTheme = Theme.Get();
-                if (!sysTheme.IsEqual(Current, Current.Resources.MergedDictionaries.ToList()))
-                {
-                    sysTheme.Set(Current, Current.Resources.MergedDictionaries.ToList());
-                }
+                PathToWorkingDir = appDevToolsExts.Directory.GetPathToDirInAppData(Name, true)!;
 
-                Autorun autorun = new();
-                object? autorunRegistry = autorun.Get(Name);
-                if (autorunRegistry != null)
+                PathToSettings = Path.Combine(PathToWorkingDir, DEF_SETTINGS_NAME);
+                if (!File.Exists(PathToSettings))
                 {
-                    autorun.Delete(Name);
+                    File.Create(PathToSettings).Close();
                 }
-                autorun.Set(Name, Location);
+                List<Settings>? contentSettings = appDevToolsExts.File.Load<Settings>(PathToSettings);
+                if (contentSettings != null && contentSettings.FirstOrDefault() != null)
+                {
+                    Settings = contentSettings.First();
+                }
+                else
+                {
+                    Settings = new Settings();
+                }
+                appDevToolsExts.File.Save(PathToSettings, new List<Settings> { Settings });
+
+                if (Settings.TimeoutBeforeAutorun > 0)
+                {
+                    Task.Delay(TimeSpan.FromMinutes(Settings.TimeoutBeforeAutorun)).Wait();
+                }
+                Settings.Theme.Set(Current, Current.Resources.MergedDictionaries.ToList());
+                appDevToolsAddns.Colors.SetTitleBarColor(Current, Settings.TitleBarColor);
+                Settings.Lang.Set(Current, Current.Resources.MergedDictionaries.ToList());
 
                 Thread appLoadingThread = new(() => 
                 {
@@ -180,8 +176,6 @@ namespace BoomKey
                 });
                 appLoadingThread.SetApartmentState(ApartmentState.STA);
                 appLoadingThread.Start();
-
-                PathToWorkingDir = appDevToolsExts.Directory.GetPathToDirInAppData(Name, true)!;
 
                 PathToSourceDir = Path.Combine(PathToWorkingDir, InstallerInfo.NameSource);
                 if (!Directory.Exists(PathToSourceDir))
@@ -215,9 +209,7 @@ namespace BoomKey
                     foreach (Section section in sections)
                     {
                         if (section.Shortcuts != null)
-                        {
-                            section.Shortcuts = new ObservableCollection<Shortcut>(section.Shortcuts.ToList().OrderBy(x => x.Name).ToList());
-                            
+                        {                            
                             foreach (Shortcut shortcut in section.Shortcuts)
                             {
                                 shortcut.RestoreIcon();
@@ -238,12 +230,6 @@ namespace BoomKey
                     File.Create(PathToInfoMainWindow).Close();
                 }
 
-                PathToInfoSubWindow = Path.Combine(PathToInfoWindowsDir, DEF_FILENAME_INFO_SUB_WINDOW);
-                if (!File.Exists(PathToInfoSubWindow))
-                {
-                    File.Create(PathToInfoSubWindow).Close();
-                }
-
                 PathToInfoColors = Path.Combine(PathToInfoDir, DEF_FILENAME_INFO_COLORS);
                 if (!File.Exists(PathToInfoColors))
                 {
@@ -256,10 +242,11 @@ namespace BoomKey
                 }
                 else
                 {
-                    PersonalizationColors = (from color in Addons.Colors.GetAll() select new SolidColorBrush(color)).ToList();
+                    PersonalizationColors = (from color in Addons.Colors.Get() select new SolidColorBrush(color)).ToList();
                 }
                 appDevToolsExts.File.Save(PathToInfoColors, PersonalizationColors);
 
+                NotificationManager = new NotificationManager();
                 UpdateLoader = new(new appUpdateLoader.Models.Settings(Version, DeveloperNickname, RepositoryName, SourceName, Path.Combine(PathToUpdateDir, $"update.zip")));
 
                 Task.Delay(2000).Wait();

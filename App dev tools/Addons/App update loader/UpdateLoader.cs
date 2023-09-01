@@ -23,6 +23,8 @@ namespace AppDevTools.Addons.AppUpdateLoader
         private BackgroundWorker? updateSearcher;
         private WebClient? webClient;
         private NotificationManager? notificationManager;
+        private NotifierProgress<(double?, string, string, bool?)>? notifierProgress = null;
+        private DispatcherTimer? notifierProgressTimer = null;
         #endregion Private
 
         #endregion Fields
@@ -207,7 +209,7 @@ namespace AppDevTools.Addons.AppUpdateLoader
             }
         }
 
-        public void DownloadUpdate(Update update, NotificationContent contentForWaitingLoadingUpdate, NotificationContent contentForInstallLoadedUpdate)
+        public void DownloadUpdate(Update update, NotificationContent contentForWaitingLoadingUpdate, NotificationContent contentForErrorLoadingUpdate, NotificationContent contentForInstallLoadedUpdate)
         {
             try
             {
@@ -228,8 +230,8 @@ namespace AppDevTools.Addons.AppUpdateLoader
                         }
                         Directory.CreateDirectory(pathToLoadingDir!);
 
-                        notificationManager = new NotificationManager();
-                        NotifierProgress<(double?, string, string, bool?)> notifierProgress = notificationManager.ShowProgressBar
+                        notificationManager ??= new NotificationManager();
+                        notifierProgress = notificationManager.ShowProgressBar
                         (
                             contentForWaitingLoadingUpdate.Title, 
                             false, 
@@ -249,9 +251,9 @@ namespace AppDevTools.Addons.AppUpdateLoader
                             true
                         );
 
-                        DispatcherTimer? reportTimer = new() { Interval = TimeSpan.FromSeconds(1) };
-                        reportTimer.Tick += (sender, e) => { notifierProgress.Report((null, contentForWaitingLoadingUpdate.Message, contentForWaitingLoadingUpdate.Title, false)); };
-                        reportTimer.Start();
+                        notifierProgressTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+                        notifierProgressTimer.Tick += (sender, e) => { notifierProgress.Report((null, contentForWaitingLoadingUpdate.Message, contentForWaitingLoadingUpdate.Title, false)); };
+                        notifierProgressTimer.Start();
 
                         webClient = new WebClient()
                         {
@@ -261,9 +263,6 @@ namespace AppDevTools.Addons.AppUpdateLoader
                         };
                         webClient.DownloadFileCompleted += (sender, e) =>
                         {
-                            reportTimer.Stop();
-                            reportTimer = null;
-
                             if (e.Cancelled)
                             {
                                 return;
@@ -283,8 +282,14 @@ namespace AppDevTools.Addons.AppUpdateLoader
                                 }
                             }
 
+                            notifierProgressTimer.Stop();
+                            notifierProgressTimer = null;
+
                             notifierProgress.Dispose();
                             notificationManager.Show(contentForInstallLoadedUpdate, null, TimeSpan.MaxValue);
+
+                            DownloadUpdateCompleted?.Invoke();
+
                         };
 
                         webClient.DownloadFileAsync(new Uri(update.DownloadLink), Settings.PathToLoading);
@@ -293,19 +298,25 @@ namespace AppDevTools.Addons.AppUpdateLoader
             }
             catch
             {
+                notifierProgressTimer?.Stop();
+                notifierProgressTimer = null;
+                notifierProgress?.Dispose();
+
+                notificationManager ??= new NotificationManager();
+                notificationManager.Show(contentForErrorLoadingUpdate, null, TimeSpan.MaxValue);
+
+                ErrorDownloadUpdate?.Invoke();
+
                 return;
             }
         }
 
         public void CancelDownloadUpdate()
         {
-            if (webClient == null)
-            {
-                return;
-            }
-
-            webClient.CancelAsync();
-            webClient.Dispose();
+            webClient?.CancelAsync();
+            webClient?.Dispose();
+            notifierProgressTimer?.Stop();
+            notifierProgress?.Dispose();
         }
         #endregion Public
 
@@ -316,6 +327,8 @@ namespace AppDevTools.Addons.AppUpdateLoader
         #region Public
         public event Action? UpdateSearchIsOver;
         public event Action<Update>? UpdateAppeared;
+        public event Action? DownloadUpdateCompleted;
+        public event Action? ErrorDownloadUpdate;
         #endregion Public
 
         #endregion Events

@@ -8,7 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Dictionaries/ConvertersDictionary.xaml"/>
                 <ResourceDictionary Source="/Dictionaries/VectorsDictionary.xaml"/>
-                <ResourceDictionary Source="/Dictionaries/TextsDictionaries/Rus/TextsDictionary.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Boom key;component/Dictionaries/TextsDictionaries/Rus/TextsDictionary.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Themes/DarkTheme/GenericDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
