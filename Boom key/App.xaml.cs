@@ -124,7 +124,7 @@ namespace BoomKey
                 SourceName = DEF_SOURCE_NAME;
 
                 PathToDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
-                Location = Path.Combine(PathToDir, $"{GetType().Assembly.GetName().Name}.exe");
+                Location = Path.Combine(PathToDir, $"{Name}.exe");
 
                 Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
                 if (assemblyVersion != null)

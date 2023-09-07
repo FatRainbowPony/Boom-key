@@ -16,7 +16,7 @@
     xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
     mc:Ignorable="d"
     Title="{DynamicResource MainWindowTitle}"
-    Width="500" MinWidth="550" 
+    Width="600" MinWidth="550" 
     Height="400" MinHeight="350"
     Style="{StaticResource WinNoteHidingStyle}"
     addons:WindowBlur.IsEnabled="True"

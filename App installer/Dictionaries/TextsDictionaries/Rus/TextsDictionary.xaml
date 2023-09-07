@@ -1,0 +1,103 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--#region Titles -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AppInstallerTitle">
+        Установка
+    </system:String>
+    <!--#endregion Titles -->
+
+    <!--#region Description -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="NextDescription">
+        Далее
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="BackDescription">
+        Назад
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ConfirmDescription">
+        ОК
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="UnconfirmDescription">
+        Отмена
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="InstallDescription">
+        Установить
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FinishDescription">
+        Завершить
+    </system:String>
+
+    <!--#region Description for main window -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectLangDescription">
+        Выберите язык установки
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectLangForInstallationDescription">
+        Выберите язык, который будет использован в процессе установки.
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectTasksToExecuteDescription">
+        Выберите дополнительные задачи
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="WhichTasksShouldBeExecutedDescription">
+        Какие дополнительные задачи необходимо выполнить?
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectTasksForInstallationDescription">
+        Выберите дополнительные задачи, которые должны выполниться при установке, после этого нажмите "Далее":
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="TasksDescription">
+        Дополнительные значки:
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CreateDesktopShortcutDescription">
+        Создать значок на Рабочем столе
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ReadyToInstallDescription">
+        Все готово к установке
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SetupIsReadyToBegingInstallationDescription">
+        Программа установки готова начать установку на ваш компьютер.
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ClickInstallToContinueDescription">
+        Нажмите "Установить", чтобы продолжить.
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PerformingInstallationDescription">
+        Выполнение установки:
+    </system:String>
+    
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FinalInstallationDescription">
+        Завершение установки
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AboutFinalInstallationDescription">
+        Программа установлена на ваш компьютер. Приложение запустить с помощью соответствующего значка. 
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ClickFinishToExitFromSetupDescription">
+        Нажмите "Завершить", чтобы выйти из программы установки.
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LaunchAppDescription">
+        Запустить приложение
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="QuestionAboutCancelInstallationDescription" xml:space="preserve">Установка не завершена. Если вы выйдете, программа не&#10;будет установлена.
+&#10;Вы сможете завершить установку, запустив программу установки позже.&#10;
+Выйти из программы установки?</system:String>
+    <!--#endregion Description for main window -->
+
+    <!--#endregion Description -->
+
+</ResourceDictionary>

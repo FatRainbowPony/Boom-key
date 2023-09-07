@@ -1,10 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System;
-using AppDevTools.Windows.PersonalizedWindow;
-using System.Linq;
-using System.Threading;
-using System.Windows;
+﻿using AppDevTools.Windows.PersonalizedWindow;
 
 namespace Views.BoomKey
 {

@@ -1,0 +1,496 @@
+﻿<pwindow:PersonalizedWindow 
+    x:Name="MainWin"
+    x:Class="AppInstaller.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:checkboxs="clr-namespace:AppDevTools.Controls.CheckBoxs;assembly=AppDevTools"
+    xmlns:pwindow="clr-namespace:AppDevTools.Windows.PersonalizedWindow;assembly=AppDevTools"
+    xmlns:vm="clr-namespace:AppInstaller.ViewModels"
+    mc:Ignorable="d"
+    Title="{Binding WindowName}" 
+    Width="500"
+    Height="400"
+    Style="{StaticResource WinDialogNoResizeStyle}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource WindowBorderBrush}"
+    BorderThickness="1"
+    WindowRoundingCorners="5"
+    TitleBarVisibility="Visible"
+    TitleBarBackground="{DynamicResource TitleBarBackgroundBrush}"
+    TitleBarRoundingCorners="5, 5, 0, 0"
+    CaptionForeground="{DynamicResource TextForegroundBrush}"
+    ManagingButtonVisibility="Hidden"
+    ManagingButtonHeight="25"
+    ManagingButtonWidth="25"
+    ManagingButtonRoundingCorners="12.5"                         
+    WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainWindowVM/>
+    </Window.DataContext>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding StartupWinComm}"/>
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ClosingWinComm}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+
+        <!--#region Null step -->
+        <Grid
+            x:Name="NullStep"
+            Visibility="{Binding ShowingNullStep ,Converter={StaticResource BolleanToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock
+                x:Name="TitleSettingsLang"
+                Grid.Row="0"
+                Text="{DynamicResource SelectLangDescription}"
+                TextAlignment="Left"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                FontSize="15"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="6, 6, 6, 20"/>
+            <TextBlock
+                Grid.Row="1"
+                Text="{DynamicResource SelectLangForInstallationDescription}"
+                TextAlignment="Left"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="6, 0, 6, 6"/>
+            <ComboBox
+                x:Name="Langs"
+                Grid.Row="2"
+                ItemsSource="{Binding Langs}"
+                SelectedItem="{Binding SelectedLang}"
+                Style="{DynamicResource ComboBoxStandardStyle}"
+                Height="20"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Margin="6, 0, 6, 0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction
+                            Command="{Binding ChangeLangComm}"
+                            CommandParameter="{Binding ElementName=Langs, Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+            <Border 
+                Grid.Row="3"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button 
+                        x:Name="MoveToFirstStep"
+                        Grid.Column="0"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource NextDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Command="{Binding MoveToFirstStepComm}"/>
+                    <Button 
+                        Grid.Column="1"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource UnconfirmDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0, 10, 10, 10"
+                        Command="{Binding CancelInstallationComm}"/>
+                </Grid>
+            </Border>
+        </Grid>
+        <!--#endregion Null step -->
+
+        <!--#region First step -->
+        <Grid
+            x:Name="FirstStep"
+            Visibility="{Binding ShowingFirstStep, Converter={StaticResource BolleanToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="{DynamicResource SelectTasksToExecuteDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        FontSize="15"
+                        FontWeight="DemiBold"
+                        Margin="6"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Text="{DynamicResource WhichTasksShouldBeExecutedDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        Margin="6, 0, 6, 0"/>
+                </Grid>
+                <Image
+                    Grid.Column="1"
+                    Source="{Binding WindowIcon}"
+                    Stretch="UniformToFill"
+                    Width="65"
+                    Height="65"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="6, 0, 6, 0"/>
+            </Grid>
+            <TextBlock 
+                Grid.Row="1"
+                Text="{DynamicResource SelectTasksForInstallationDescription}"
+                TextAlignment="Left"
+                TextWrapping="Wrap"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                Margin="6, 20, 6, 6"/>
+            <TextBlock 
+                Grid.Row="2"
+                Text="{DynamicResource TasksDescription}"
+                TextAlignment="Left"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                Margin="6, 0, 6, 6"/>
+            <checkboxs:VectorIconCheckBox 
+                x:Name="CreateDescktopShortcut"
+                Grid.Row="3"
+                IsChecked="{Binding CreateDesktopShortcut, UpdateSourceTrigger=PropertyChanged}"
+                Style="{DynamicResource VectorIconCheckBoxStandardStyle}"
+                Text="{DynamicResource CreateDesktopShortcutDescription}"
+                Margin="6, 0, 6, 6"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"/>
+            <Border 
+                Grid.Row="4"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button 
+                        Grid.Column="0"
+                        x:Name="MoveBackToNullStep"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource BackDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="10, 10, 0, 10"
+                        Command="{Binding MoveBackToNullStepComm}"/>
+                    <Button 
+                        x:Name="MoveToSecondStep"
+                        Grid.Column="1"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource NextDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Command="{Binding MoveToSecondStepComm}"/>
+                    <Button 
+                        Grid.Column="2"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource UnconfirmDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0, 10, 10, 10"
+                        Command="{Binding CancelInstallationComm}"/>
+                </Grid>
+            </Border>
+        </Grid>
+        <!--#endregion First step -->
+
+        <!--#region Second step -->
+        <Grid
+            x:Name="SecondStep"
+            Visibility="{Binding ShowingSecondStep, Converter={StaticResource BolleanToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="{DynamicResource ReadyToInstallDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        FontSize="15"
+                        FontWeight="DemiBold"
+                        Margin="6"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Text="{DynamicResource SetupIsReadyToBegingInstallationDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        Margin="6, 0, 6, 0"/>
+                </Grid>
+                <Image
+                    Grid.Column="1"
+                    Source="{Binding WindowIcon}"
+                    Stretch="UniformToFill"
+                    Width="65"
+                    Height="65"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="6, 0, 6, 0"/>
+            </Grid>
+            <TextBlock 
+                Grid.Row="1"
+                Text="{DynamicResource ClickInstallToContinueDescription}"
+                TextAlignment="Left"
+                TextWrapping="Wrap"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="6, 20, 6, 6"/>
+            <Border 
+                Grid.Row="2"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button 
+                        x:Name="MoveBackToFirstStep"
+                        Grid.Column="0"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource BackDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="10, 10, 0, 10"
+                        Command="{Binding MoveBackToFirstStepComm}"/>
+                    <Button 
+                        x:Name="MoveToThirdStep"
+                        Grid.Column="1"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource InstallDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="75"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Command="{Binding MoveToThirdStepComm}"/>
+                    <Button 
+                        Grid.Column="2"
+                        Style="{DynamicResource ButtonStandardStyle}"
+                        Content="{DynamicResource UnconfirmDescription}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Width="60"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0, 10, 10, 10"
+                        Command="{Binding CancelInstallationComm}"/>
+                </Grid>
+            </Border>
+        </Grid>
+        <!--#endregion Second step -->
+
+        <!--#region Third step -->
+        <Grid
+            x:Name="ThirdStep"
+            Visibility="{Binding ShowingThirdStep, Converter={StaticResource BolleanToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock
+                Grid.Row="0"
+                TextAlignment="Left"
+                Foreground="{DynamicResource TextForegroundBrush}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="6, 20, 6, 6">
+                <Run Text="{DynamicResource PerformingInstallationDescription}"/>
+                <Run Text="{Binding InstallationProgress, UpdateSourceTrigger=PropertyChanged}"/>
+                <Run Text="%"/>
+            </TextBlock>
+            <ProgressBar
+                Grid.Row="1"
+                Style="{DynamicResource ProgressBarStandardStyle}"
+                Value="{Binding InstallationProgress, UpdateSourceTrigger=PropertyChanged}"
+                Height="20"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Margin="6, 0, 6, 0"/>
+            <Border 
+                Grid.Row="4"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0">
+                <Button 
+                    Grid.Column="1"
+                    Style="{DynamicResource ButtonStandardStyle}"
+                    Content="{DynamicResource UnconfirmDescription}"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Width="60"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0, 10, 10, 10"
+                    Command="{Binding CancelInstallationComm}"/>
+            </Border>
+        </Grid>
+        <!--#endregion Third step -->
+
+        <!--#region Final step -->
+        <Grid
+            x:Name="FinalStep"
+            Visibility="{Binding ShowingFinalStep, Converter={StaticResource BolleanToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Border 
+                    Grid.Column="0"
+                    Background="{DynamicResource SubContainerBackgroundBrush}"
+                    BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                    BorderThickness="0, 0, 1, 0">
+                    <Image
+                        Source="{Binding WindowIcon}"
+                        Stretch="UniformToFill"
+                        Width="150"
+                        Height="150"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="20, 0, 20, 0"/>
+                </Border>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="{DynamicResource FinalInstallationDescription}"
+                        TextAlignment="Left"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        FontSize="15"
+                        FontWeight="DemiBold"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Margin="6, 6, 6, 20"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Text="{DynamicResource AboutFinalInstallationDescription}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Margin="6, 0, 6, 20"/>
+                    <TextBlock
+                        Grid.Row="2"
+                        Text="{DynamicResource ClickFinishToExitFromSetupDescription}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap"
+                        Foreground="{DynamicResource TextForegroundBrush}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Margin="6, 0, 6, 0"/>
+                    <checkboxs:VectorIconCheckBox 
+                        x:Name="LaunchApp"
+                        Grid.Row="3"
+                        IsChecked="{Binding LaunchApp, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{DynamicResource VectorIconCheckBoxStandardStyle}"
+                        Text="{DynamicResource LaunchAppDescription}"
+                        Margin="6"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top">
+                    </checkboxs:VectorIconCheckBox>
+                </Grid>
+            </Grid>
+            <Border 
+                Grid.Row="1"
+                Background="{DynamicResource SubContainerBackgroundBrush}"
+                BorderBrush="{DynamicResource SubContainerBorderBrush}"
+                BorderThickness="0, 1, 0, 0">
+                <Button 
+                    Grid.Column="1"
+                    Style="{DynamicResource ButtonStandardStyle}"
+                    Content="{DynamicResource FinishDescription}"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Width="75"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0, 10, 10, 10"
+                    Command="{Binding FinishInstallationComm}"/>
+            </Border>
+        </Grid>
+        <!--#endregion Final step -->
+
+    </Grid>
+</pwindow:PersonalizedWindow>

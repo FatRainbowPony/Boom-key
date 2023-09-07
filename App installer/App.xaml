@@ -1,0 +1,14 @@
+﻿<Application x:Class="AppInstaller.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="/Views/MainWindow.xaml"
+             Startup="AppStartup">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Setup;component/Dictionaries/TextsDictionaries/Rus/TextsDictionary.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Themes/DarkTheme/GenericDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

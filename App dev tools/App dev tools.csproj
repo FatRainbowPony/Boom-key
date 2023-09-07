@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <SignAssembly>False</SignAssembly>
     <AssemblyName>AppDevTools</AssemblyName>
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>

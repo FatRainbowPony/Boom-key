@@ -1,0 +1,103 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--#region Titles -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AppInstallerTitle">
+        Setup
+    </system:String>
+    <!--#endregion Titles -->
+
+    <!--#region Description -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="NextDescription">
+        Next
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="BackDescription">
+        Back
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ConfirmDescription">
+        OK
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="UnconfirmDescription">
+        Cancel
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="InstallDescription">
+        Install
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FinishDescription">
+        Finish
+    </system:String>
+
+    <!--#region Description for main window -->
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectLangDescription">
+        Select the installation language
+    </system:String>
+    
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectLangForInstallationDescription">
+        Select the language to be used during the installation
+    </system:String>
+    
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectTasksToExecuteDescription">
+        Select additional tasks
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="WhichTasksShouldBeExecutedDescription">
+        Which additional tasks should be performed?
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SelectTasksForInstallationDescription">
+        Select the additional tasks you would like Setup to perform while installing, then click Next
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="TasksDescription">
+        Additional shortcuts:
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="CreateDesktopShortcutDescription">
+        Create a desktop shortcut
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ReadyToInstallDescription">
+        Ready to install
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="SetupIsReadyToBegingInstallationDescription">
+        Setup is now ready to begin installing on your computer
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ClickInstallToContinueDescription">
+        Click Install to continue with the installation
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="PerformingInstallationDescription">
+        Performing the installation:
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="FinalInstallationDescription">
+        Completing the installation
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="AboutFinalInstallationDescription">
+        Setup has finished installing on your computer. The application may be launched by selecting the installed shortcuts. 
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="ClickFinishToExitFromSetupDescription">
+        Click Finish to exit Setup
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="LaunchAppDescription">
+        Launch application
+    </system:String>
+
+    <system:String xmlns:system="clr-namespace:System;assembly=System.Runtime" x:Key="QuestionAboutCancelInstallationDescription" xml:space="preserve">Setup is not complete. If you exit now, the program will not be installed.&#10;
+You may run Setup again at another time to complete the&#10;installation.
+Exit setup?</system:String>
+    <!--#endregion Description for main window -->
+
+    <!--#endregion Description -->
+
+</ResourceDictionary>

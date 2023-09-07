@@ -6,7 +6,7 @@
     <RootNamespace>BoomKey</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <AssemblyName>Boom key</AssemblyName>
     <ApplicationIcon>Assets\Icons\TrayAppIcon.ico</ApplicationIcon>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>

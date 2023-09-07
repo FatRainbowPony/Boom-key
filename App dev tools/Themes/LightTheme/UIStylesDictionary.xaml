@@ -15,6 +15,46 @@
         <ResourceDictionary Source="pack://application:,,,/AppDevTools;component/Windows/Personalized window/PersonalizedWindowStylesDictionary.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
+    <!--#region Button -->
+    <Style x:Key="ButtonStandardStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundDarkBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
+        <Setter Property="Content" Value="Button"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="5">
+                        <TextBlock 
+                            Text="{TemplateBinding Content}"
+                            TextAlignment="Center"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource ControlMouseMoveLightBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion Button -->
+
     <!--#region VectorIconButton -->
     <Style x:Key="VectorIconButtoStandardStyle" TargetType="buttons:VectorIconButton">
         <Setter Property="Background" Value="Transparent"/>
