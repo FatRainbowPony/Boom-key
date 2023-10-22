@@ -1,2 +1,2 @@
 # Boom-key
- Application for hotkey management
+Application for hotkey management on Windows
